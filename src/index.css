@@ -2,43 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent: #F7931E;
+  --accent-d: #D97B0E;
+  --accent-l: #FDB044;
+  --accent-rgb: 247,147,30;
+  --accent-01: rgba(247,147,30,0.08);
+  --accent-02: rgba(247,147,30,0.15);
+  --accent-03: rgba(247,147,30,0.25);
+  --accent-shadow: rgba(247,147,30,0.4);
+  --accent-shadow-lg: rgba(247,147,30,0.55);
+  --bg: #060D1A;
+  --bg2: #0E1525;
+  --navy: #1B2A4A;
+  --head-from: #4A6080;
+  --head-to: #E8EFF5;
+}
+
 html, body, #root {
-  background: #060D1A;
+  background: var(--bg);
   font-family: 'Kanit', sans-serif;
   overflow-x: hidden;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 .hero-heading {
-  background: linear-gradient(180deg, #4A6080 0%, #E8EFF5 100%);
+  background: linear-gradient(180deg, var(--head-from) 0%, var(--head-to) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .orange-heading {
-  background: linear-gradient(135deg, #F7931E 0%, #FDB044 60%, #F7931E 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-l) 60%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .glass-card {
-  background: rgba(27, 42, 74, 0.55);
-  border: 1px solid rgba(247, 147, 30, 0.25);
+  background: rgba(var(--navy-rgb, 27,42,74), 0.55);
+  border: 1px solid var(--accent-03);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: #060D1A; }
-::-webkit-scrollbar-thumb { background: #F7931E; border-radius: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
