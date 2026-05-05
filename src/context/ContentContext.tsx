@@ -19,7 +19,7 @@ async function fetchRemote(): Promise<SiteContent | null> {
   if (!hasRemote()) return null
   try {
     const res = await fetch(`${BIN_URL}/latest`, {
-      headers: { 'X-Master-Key': BIN_KEY },
+      headers: { 'X-Master-Key': BIN_KEY! },
     })
     if (!res.ok) return null
     const data = await res.json()
@@ -34,7 +34,7 @@ async function pushRemote(content: SiteContent): Promise<boolean> {
   try {
     const res = await fetch(BIN_URL, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY },
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY! },
       body: JSON.stringify(content),
     })
     return res.ok
