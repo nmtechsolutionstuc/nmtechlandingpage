@@ -4,26 +4,35 @@ import { defaultContent, FONTS } from '../content/defaultContent'
 
 const STORAGE_KEY = 'nmtech_content_v2'
 const CACHE_TS_KEY = 'nmtech_cache_ts'
-const CACHE_TTL = 5 * 60 * 1000 // 5 min — re-fetch if cache is older than this
+const CACHE_TTL = 5 * 60 * 1000 // 5 min
 
-// ─── JSONBin helpers ──────────────────────────────────────────────────────────
-const BIN_ID = import.meta.env.VITE_JSONBIN_BIN_ID
-const BIN_KEY = import.meta.env.VITE_JSONBIN_API_KEY
-const BIN_URL = BIN_ID ? `https://api.jsonbin.io/v3/b/${BIN_ID}` : ''
+// ─── Supabase REST helpers ────────────────────────────────────────────────────
+const SB_URL = import.meta.env.VITE_SUPABASE_URL
+const SB_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 function hasRemote() {
-  return Boolean(BIN_ID && BIN_KEY)
+  return Boolean(SB_URL && SB_KEY)
+}
+
+function sbHeaders() {
+  return {
+    'apikey': SB_KEY!,
+    'Authorization': `Bearer ${SB_KEY!}`,
+    'Content-Type': 'application/json',
+  }
 }
 
 async function fetchRemote(): Promise<SiteContent | null> {
   if (!hasRemote()) return null
   try {
-    const res = await fetch(`${BIN_URL}/latest`, {
-      headers: { 'X-Master-Key': BIN_KEY! },
-    })
+    const res = await fetch(
+      `${SB_URL}/rest/v1/site_content?id=eq.1&select=content`,
+      { headers: sbHeaders() }
+    )
     if (!res.ok) return null
-    const data = await res.json()
-    return data.record as SiteContent
+    const rows = await res.json()
+    if (!rows[0]?.content) return null
+    return rows[0].content as SiteContent
   } catch {
     return null
   }
@@ -32,10 +41,10 @@ async function fetchRemote(): Promise<SiteContent | null> {
 async function pushRemote(content: SiteContent): Promise<boolean> {
   if (!hasRemote()) return false
   try {
-    const res = await fetch(BIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY! },
-      body: JSON.stringify(content),
+    const res = await fetch(`${SB_URL}/rest/v1/site_content?id=eq.1`, {
+      method: 'PATCH',
+      headers: { ...sbHeaders(), 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ content, updated_at: new Date().toISOString() }),
     })
     return res.ok
   } catch {
@@ -47,10 +56,7 @@ async function pushRemote(content: SiteContent): Promise<boolean> {
 function loadLocal(): SiteContent {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const parsed = JSON.parse(saved) as SiteContent
-      return deepMerge(defaultContent, parsed)
-    }
+    if (saved) return deepMerge(defaultContent, JSON.parse(saved) as SiteContent)
   } catch {}
   return defaultContent
 }
@@ -65,7 +71,7 @@ function cacheIsStale(): boolean {
   return Date.now() - ts > CACHE_TTL
 }
 
-// ─── Deep merge (keep defaults for new fields added after a save) ─────────────
+// ─── Deep merge ───────────────────────────────────────────────────────────────
 function deepMerge(defaults: SiteContent, saved: Partial<SiteContent>): SiteContent {
   return {
     ...defaults,
@@ -176,10 +182,8 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // On mount: fetch remote if stale or never fetched
   useEffect(() => {
     if (!hasRemote()) return
-    // Always fetch in admin; for public site only fetch if cache is stale
     const isAdmin = window.location.hash === '#admin'
     if (isAdmin || cacheIsStale()) {
       syncFromRemote()
@@ -189,7 +193,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Apply theme whenever it changes
   useEffect(() => {
     applyTheme(content.theme)
   }, [content.theme])
