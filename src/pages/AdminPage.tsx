@@ -54,10 +54,6 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
             Ingresar →
           </button>
         </form>
-        <p className="text-[#8A95A8] text-xs text-center mt-6">
-          Por defecto: <span className="text-[#F7931E]">nmtech2024</span><br />
-          Cambiable en <code className="text-white">.env</code> → <code className="text-white">VITE_ADMIN_PASSWORD</code>
-        </p>
       </div>
     </div>
   )
