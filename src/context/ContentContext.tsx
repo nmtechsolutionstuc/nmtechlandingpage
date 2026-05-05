@@ -3,8 +3,6 @@ import { SiteContent } from '../content/types'
 import { defaultContent, FONTS } from '../content/defaultContent'
 
 const STORAGE_KEY = 'nmtech_content_v2'
-const CACHE_TS_KEY = 'nmtech_cache_ts'
-const CACHE_TTL = 5 * 60 * 1000 // 5 min
 
 // ─── Supabase REST helpers ────────────────────────────────────────────────────
 const SB_URL = import.meta.env.VITE_SUPABASE_URL
@@ -63,12 +61,6 @@ function loadLocal(): SiteContent {
 
 function saveLocal(content: SiteContent) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(content))
-  localStorage.setItem(CACHE_TS_KEY, String(Date.now()))
-}
-
-function cacheIsStale(): boolean {
-  const ts = Number(localStorage.getItem(CACHE_TS_KEY) || 0)
-  return Date.now() - ts > CACHE_TTL
 }
 
 // ─── Deep merge ───────────────────────────────────────────────────────────────
@@ -184,12 +176,8 @@ export function ContentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hasRemote()) return
-    const isAdmin = window.location.hash === '#admin'
-    if (isAdmin || cacheIsStale()) {
-      syncFromRemote()
-    } else {
-      setSyncStatus('synced')
-    }
+    // Siempre fetch desde Supabase al montar — localStorage solo da la carga inicial rápida
+    syncFromRemote()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -210,7 +198,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   const resetContent = () => {
     setContent(defaultContent)
     localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem(CACHE_TS_KEY)
     applyTheme(defaultContent.theme)
     if (hasRemote()) pushRemote(defaultContent)
     setSyncStatus(hasRemote() ? 'synced' : 'no-remote')
