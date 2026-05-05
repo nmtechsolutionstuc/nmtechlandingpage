@@ -435,7 +435,7 @@ function exportJSON(content: SiteContent) {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(sessionStorage.getItem('nm_admin') === '1')
   const [tab, setTab] = useState<Tab>('apariencia')
-  const { content, updateContent, resetContent } = useContent()
+  const { content, updateContent, resetContent, syncStatus } = useContent()
   const [local, setLocal] = useState<SiteContent>(content)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving'>('saved')
 
@@ -514,6 +514,9 @@ export default function AdminPage() {
         <div className="flex items-center gap-3">
           <span className={`text-xs px-3 py-1 rounded-full font-medium ${saveStatus === 'saved' ? 'text-green-400 bg-green-400/10' : saveStatus === 'saving' ? 'text-yellow-400 bg-yellow-400/10' : 'text-orange-400 bg-orange-400/10'}`}>
             {saveStatus === 'saved' ? '✓ Guardado' : saveStatus === 'saving' ? '⟳ Guardando...' : '● Sin guardar'}
+          </span>
+          <span className={`text-xs px-3 py-1 rounded-full font-medium ${syncStatus === 'synced' ? 'text-blue-400 bg-blue-400/10' : syncStatus === 'syncing' ? 'text-yellow-400 bg-yellow-400/10' : syncStatus === 'error' ? 'text-red-400 bg-red-400/10' : 'text-[#8A95A8] bg-white/5'}`}>
+            {syncStatus === 'synced' ? '☁ Supabase OK' : syncStatus === 'syncing' ? '⟳ Sincronizando...' : syncStatus === 'error' ? '✗ Error Supabase' : '○ Sin remoto'}
           </span>
           <a href="/" target="_blank" rel="noopener noreferrer" className="text-xs px-4 py-2 rounded-full border border-white/20 text-[#D7E2EA] hover:bg-white/5 transition-colors">
             Ver sitio →
