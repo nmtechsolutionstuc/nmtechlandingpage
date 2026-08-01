@@ -7,21 +7,21 @@ const PROJECTS = [
     num: '01',
     category: 'Agencia / Estudio de Diseño',
     name: 'Axion Studio',
-    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260516_090133_c157d30b-a99a-4477-bec1-a446149ec3f2.png&w=1280&q=85',
+    image: 'https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/hero%20sections/animated%20(27).webp',
     caption: 'Ideal para estudios de diseño, agencias creativas o consultoras que buscan una imagen sofisticada y minimalista.',
   },
   {
     num: '02',
     category: 'Fintech / Stablecoin',
     name: 'Halo — USD Halo',
-    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260423_164207_f243351d-ed59-48ec-83a0-a5e996bdbe3c.png&w=1280&q=85',
+    image: 'https://motionsites.ai/assets/halo-usd-hero-CtMXOklk.gif',
     caption: 'Ideal para fintech, cripto, stablecoins o cualquier producto financiero digital que necesite transmitir confianza.',
   },
   {
     num: '03',
     category: 'Portfolio 3D / Creativo',
     name: 'Jack — 3D Creator',
-    image: 'https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png',
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260715_020402_14047c8b-e116-4ac5-bc7d-1ab18d18a358.png&w=1280&q=85',
     caption: 'Ideal para portfolios de artistas 3D, diseñadores o creativos independientes que quieran destacar su trabajo.',
   },
 ]
@@ -80,13 +80,18 @@ function ProjectCard({
         </div>
 
         {/* Image */}
-        <img
-          src={project.image}
-          alt={project.name}
-          loading="lazy"
-          className="w-full rounded-[24px] sm:rounded-[32px] object-cover"
+        <div
+          className="w-full flex items-center justify-center rounded-[24px] sm:rounded-[32px] overflow-hidden bg-[#0E1A30]"
           style={{ minHeight: 'clamp(220px, 35vw, 460px)', maxHeight: '60vh' }}
-        />
+        >
+          <img
+            src={project.image}
+            alt={project.name}
+            loading="lazy"
+            className="max-w-full h-full object-contain"
+            style={{ maxHeight: '60vh' }}
+          />
+        </div>
 
         {/* Leyenda */}
         <p className="text-[#D7E2EA]/60 text-sm sm:text-base leading-relaxed mt-4 md:mt-6 max-w-2xl">
