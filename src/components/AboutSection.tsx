@@ -29,10 +29,10 @@ export default function AboutSection() {
     <section id="nosotros" className="min-h-screen flex items-center justify-center relative px-5 sm:px-8 md:px-10 py-24 overflow-hidden" style={{ background: 'var(--bg)' }}>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] blur-3xl pointer-events-none rounded-full" style={{ background: 'radial-gradient(ellipse,var(--accent-01) 0%,transparent 70%)' }} />
 
-      <FloatingCard icon="🤖" title="IA & Chatbots" sub="Automatización inteligente" className="absolute top-[8%] left-[2%] sm:left-[4%] md:left-[6%]" delay={0.1} x={-80} />
-      <FloatingCard icon="⚡" title="Automatización" sub="Procesos sin fricción" className="absolute bottom-[10%] left-[3%] sm:left-[6%] md:left-[8%]" delay={0.25} x={-80} />
-      <FloatingCard icon="🚀" title="Landing Pages" sub="Alta conversión" className="absolute top-[8%] right-[2%] sm:right-[4%] md:right-[6%]" delay={0.15} x={80} />
-      <FloatingCard icon="📚" title="eBooks" sub="Ingresos pasivos" className="absolute bottom-[10%] right-[3%] sm:right-[6%] md:right-[8%]" delay={0.3} x={80} />
+      <FloatingCard icon="🤖" title="IA & Chatbots" sub="Automatización inteligente" className="hidden md:block absolute top-[8%] md:left-[6%]" delay={0.1} x={-80} />
+      <FloatingCard icon="⚡" title="Automatización" sub="Procesos sin fricción" className="hidden md:block absolute bottom-[10%] md:left-[8%]" delay={0.25} x={-80} />
+      <FloatingCard icon="🚀" title="Landing Pages" sub="Alta conversión" className="hidden md:block absolute top-[8%] md:right-[6%]" delay={0.15} x={80} />
+      <FloatingCard icon="📚" title="eBooks" sub="Ingresos pasivos" className="hidden md:block absolute bottom-[10%] md:right-[8%]" delay={0.3} x={80} />
 
       <div className="relative z-10 flex flex-col items-center text-center gap-10 sm:gap-14 max-w-2xl">
         <FadeIn y={40}>

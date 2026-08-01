@@ -150,7 +150,7 @@ export default function HeroSection() {
             </FadeIn>
 
             <FadeIn delay={0.5} y={20}>
-              <div className="flex gap-10 pt-8 border-t border-white/8">
+              <div className="flex flex-wrap gap-x-6 gap-y-4 sm:gap-10 pt-8 border-t border-white/8">
                 {h.stats.map((s) => (
                   <StatCounter key={s.label} end={s.value} suffix={s.suffix} label={s.label} />
                 ))}
