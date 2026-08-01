@@ -42,10 +42,7 @@ function ProjectCard({
   const scale = useTransform(progress, [rangeStart, rangeEnd], [1, targetScale])
 
   return (
-    <div
-      className="static sm:sticky flex items-center justify-center mb-10 sm:mb-0 h-auto sm:h-[85vh]"
-      style={{ top: `${index * 28 + 80}px` }}
-    >
+    <div className="flex items-center justify-center mb-10 sm:mb-14 last:mb-0">
       <motion.div
         className="w-full rounded-[36px] sm:rounded-[44px] md:rounded-[52px] border border-[#D7E2EA]/15 bg-[#060D1A] p-4 sm:p-6 md:p-8 overflow-hidden"
         style={{ scale, transformOrigin: 'top center' }}
