@@ -5,33 +5,24 @@ import FadeIn from './ui/FadeIn'
 const PROJECTS = [
   {
     num: '01',
-    category: 'Landing de Servicios',
-    name: 'Coach & Consultoría',
-    images: {
-      topLeft: 'https://motionsites.ai/assets/hero-stellar-ai-v2-preview-DjvxjG3C.gif',
-      bottomLeft: 'https://motionsites.ai/assets/hero-stellar-ai-preview-D3HL6bw1.gif',
-      right: 'https://motionsites.ai/assets/hero-codenest-preview-Cgppc2qV.gif',
-    },
+    category: 'Agencia / Estudio de Diseño',
+    name: 'Axion Studio',
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260516_090133_c157d30b-a99a-4477-bec1-a446149ec3f2.png&w=1280&q=85',
+    caption: 'Ideal para estudios de diseño, agencias creativas o consultoras que buscan una imagen sofisticada y minimalista.',
   },
   {
     num: '02',
-    category: 'Landing E-commerce',
-    name: 'Catálogo de Productos',
-    images: {
-      topLeft: 'https://motionsites.ai/assets/hero-transform-data-preview-Cx5OU29N.gif',
-      bottomLeft: 'https://motionsites.ai/assets/hero-vitara-preview-Cjz2QYyU.gif',
-      right: 'https://motionsites.ai/assets/hero-aethera-preview-DknSlcTa.gif',
-    },
+    category: 'Fintech / Stablecoin',
+    name: 'Halo — USD Halo',
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260423_164207_f243351d-ed59-48ec-83a0-a5e996bdbe3c.png&w=1280&q=85',
+    caption: 'Ideal para fintech, cripto, stablecoins o cualquier producto financiero digital que necesite transmitir confianza.',
   },
   {
     num: '03',
-    category: 'Landing Infoproducto',
-    name: 'Venta de eBooks y Cursos',
-    images: {
-      topLeft: 'https://motionsites.ai/assets/hero-designpro-preview-D8c5_een.gif',
-      bottomLeft: 'https://motionsites.ai/assets/hero-xportfolio-preview-D4A8maiC.gif',
-      right: 'https://motionsites.ai/assets/hero-nexora-preview-cx5HmUgo.gif',
-    },
+    category: 'Portfolio 3D / Creativo',
+    name: 'Jack — 3D Creator',
+    image: 'https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png',
+    caption: 'Ideal para portfolios de artistas 3D, diseñadores o creativos independientes que quieran destacar su trabajo.',
   },
 ]
 
@@ -88,34 +79,19 @@ function ProjectCard({
           </a>
         </div>
 
-        {/* Images */}
-        <div className="grid grid-cols-5 gap-3 sm:gap-4">
-          <div className="col-span-2 flex flex-col gap-3 sm:gap-4">
-            <img
-              src={project.images.topLeft}
-              alt={project.name}
-              loading="lazy"
-              className="w-full rounded-[24px] sm:rounded-[32px] object-cover"
-              style={{ height: 'clamp(110px, 15vw, 200px)' }}
-            />
-            <img
-              src={project.images.bottomLeft}
-              alt={project.name}
-              loading="lazy"
-              className="w-full rounded-[24px] sm:rounded-[32px] object-cover"
-              style={{ height: 'clamp(140px, 20vw, 300px)' }}
-            />
-          </div>
-          <div className="col-span-3">
-            <img
-              src={project.images.right}
-              alt={project.name}
-              loading="lazy"
-              className="w-full h-full rounded-[24px] sm:rounded-[32px] object-cover"
-              style={{ minHeight: 'clamp(250px, 35vw, 500px)', maxHeight: '65vh' }}
-            />
-          </div>
-        </div>
+        {/* Image */}
+        <img
+          src={project.image}
+          alt={project.name}
+          loading="lazy"
+          className="w-full rounded-[24px] sm:rounded-[32px] object-cover"
+          style={{ minHeight: 'clamp(220px, 35vw, 460px)', maxHeight: '60vh' }}
+        />
+
+        {/* Leyenda */}
+        <p className="text-[#D7E2EA]/60 text-sm sm:text-base leading-relaxed mt-4 md:mt-6 max-w-2xl">
+          {project.caption}
+        </p>
       </motion.div>
     </div>
   )
