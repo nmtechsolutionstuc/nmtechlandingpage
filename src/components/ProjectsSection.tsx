@@ -5,24 +5,35 @@ import FadeIn from './ui/FadeIn'
 const PROJECTS = [
   {
     num: '01',
-    category: 'Agencia / Estudio de Diseño',
-    name: 'Axion Studio',
-    image: 'https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/hero%20sections/animated%20(27).webp',
-    caption: 'Ideal para estudios de diseño, agencias creativas o consultoras que buscan una imagen sofisticada y minimalista.',
+    category: 'Servicios Tech / Corporativo',
+    name: 'NMTECH Solutions v1',
+    image: '/projects/nmtech-lp-v1.png',
+    url: 'https://nmtech-lp-v1.vercel.app/',
+    caption: 'Ideal para empresas de servicios tecnológicos que buscan un estilo oscuro, sobrio y corporativo.',
   },
   {
     num: '02',
-    category: 'Fintech / Stablecoin',
-    name: 'Halo — USD Halo',
-    image: 'https://motionsites.ai/assets/halo-usd-hero-CtMXOklk.gif',
-    caption: 'Ideal para fintech, cripto, stablecoins o cualquier producto financiero digital que necesite transmitir confianza.',
+    category: 'Servicios Tech / Datos & IA',
+    name: 'NMTECH Solutions v2',
+    image: '/projects/nmtech-lp-v2.png',
+    url: 'https://nmtech-lp-v2.vercel.app/',
+    caption: 'Ideal para negocios de datos, IA o desarrollo que quieran un toque técnico, con detalles tipo terminal/código.',
   },
   {
     num: '03',
-    category: 'Portfolio 3D / Creativo',
-    name: 'Jack — 3D Creator',
-    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260715_020402_14047c8b-e116-4ac5-bc7d-1ab18d18a358.png&w=1280&q=85',
-    caption: 'Ideal para portfolios de artistas 3D, diseñadores o creativos independientes que quieran destacar su trabajo.',
+    category: 'Servicios Tech / Minimalista',
+    name: 'NMTECH Solutions v3',
+    image: '/projects/nmtech-lp-v3.png',
+    url: 'https://nmtech-lp-v3.vercel.app/',
+    caption: 'Ideal para marcas que prefieren un estilo claro, limpio y minimalista en vez de temas oscuros.',
+  },
+  {
+    num: '04',
+    category: 'E-commerce / Tienda de Productos',
+    name: 'Dinax Tech',
+    image: '/projects/dinaxtech.png',
+    url: 'https://dinaxtech.vercel.app/',
+    caption: 'Ideal para tiendas y catálogos de productos físicos que necesitan mostrar categorías y consultar por WhatsApp.',
   },
 ]
 
@@ -69,26 +80,30 @@ function ProjectCard({
             </div>
           </div>
           <a
-            href="#contacto"
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-[#D7E2EA]/30 text-[#D7E2EA]/80 font-medium uppercase tracking-widest text-xs hover:bg-[#D7E2EA]/10 hover:-translate-y-0.5 transition-all duration-300"
           >
-            Empezar ahora →
+            Ver sitio →
           </a>
         </div>
 
         {/* Image */}
-        <div
-          className="w-full flex items-center justify-center rounded-[24px] sm:rounded-[32px] overflow-hidden bg-[#0E1A30]"
-          style={{ minHeight: 'clamp(220px, 35vw, 460px)', maxHeight: '60vh' }}
+        <a
+          href={project.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full rounded-[24px] sm:rounded-[32px] overflow-hidden bg-[#0E1A30]"
         >
           <img
             src={project.image}
             alt={project.name}
             loading="lazy"
-            className="max-w-full h-full object-contain"
-            style={{ maxHeight: '60vh' }}
+            className="w-full object-cover object-top"
+            style={{ height: 'clamp(220px, 40vw, 460px)' }}
           />
-        </div>
+        </a>
 
         {/* Leyenda */}
         <p className="text-[#D7E2EA]/60 text-sm sm:text-base leading-relaxed mt-4 md:mt-6 max-w-2xl">
