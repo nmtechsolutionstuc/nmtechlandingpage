@@ -5,8 +5,8 @@ import FadeIn from './ui/FadeIn'
 const PROJECTS = [
   {
     num: '01',
-    category: 'Automatización',
-    name: 'Sistema IA Chatbot',
+    category: 'Landing de Servicios',
+    name: 'Coach & Consultoría',
     images: {
       topLeft: 'https://motionsites.ai/assets/hero-stellar-ai-v2-preview-DjvxjG3C.gif',
       bottomLeft: 'https://motionsites.ai/assets/hero-stellar-ai-preview-D3HL6bw1.gif',
@@ -15,8 +15,8 @@ const PROJECTS = [
   },
   {
     num: '02',
-    category: 'Transformación Digital',
-    name: 'AutoFlow CRM',
+    category: 'Landing E-commerce',
+    name: 'Catálogo de Productos',
     images: {
       topLeft: 'https://motionsites.ai/assets/hero-transform-data-preview-Cx5OU29N.gif',
       bottomLeft: 'https://motionsites.ai/assets/hero-vitara-preview-Cjz2QYyU.gif',
@@ -25,8 +25,8 @@ const PROJECTS = [
   },
   {
     num: '03',
-    category: 'Producto Digital',
-    name: 'EduMax Digital',
+    category: 'Landing Infoproducto',
+    name: 'Venta de eBooks y Cursos',
     images: {
       topLeft: 'https://motionsites.ai/assets/hero-designpro-preview-D8c5_een.gif',
       bottomLeft: 'https://motionsites.ai/assets/hero-xportfolio-preview-D4A8maiC.gif',
@@ -81,12 +81,10 @@ function ProjectCard({
             </div>
           </div>
           <a
-            href="https://nmtech5.mitiendanube.com/productos/"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#contacto"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-[#D7E2EA]/30 text-[#D7E2EA]/80 font-medium uppercase tracking-widest text-xs hover:bg-[#D7E2EA]/10 hover:-translate-y-0.5 transition-all duration-300"
           >
-            Ver proyecto →
+            Empezar ahora →
           </a>
         </div>
 
@@ -138,14 +136,17 @@ export default function ProjectsSection() {
       <div className="max-w-5xl mx-auto">
         <FadeIn y={40} className="text-center pt-20 sm:pt-24 md:pt-32 mb-16 sm:mb-20 md:mb-28">
           <span className="inline-block font-semibold text-xs tracking-[0.22em] uppercase text-[#F7931E] bg-[rgba(247,147,30,0.1)] border border-[rgba(247,147,30,0.2)] rounded-full px-4 py-2 mb-5">
-            Portafolio
+            Inspiración
           </span>
           <h2
             className="hero-heading font-black uppercase leading-none tracking-tight"
             style={{ fontSize: 'clamp(3rem, 12vw, 140px)' }}
           >
-            Proyectos
+            Estilos que vas a aprender a crear
           </h2>
+          <p className="text-[#D7E2EA]/60 font-medium mt-5 max-w-xl mx-auto" style={{ fontSize: 'clamp(0.95rem,1.5vw,1.1rem)' }}>
+            Referencias de diseño para inspirarte — al terminar vas a poder crear landing pages así vos mismo, gratis y con IA.
+          </p>
         </FadeIn>
 
         <div ref={containerRef}>
