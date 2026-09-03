@@ -4,15 +4,19 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        kanit: ['Kanit', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        display: ['Manrope', 'Inter', 'sans-serif'],
       },
       colors: {
-        bg: '#060D1A',
-        navy: '#1B2A4A',
-        'navy-dark': '#0E1A30',
-        orange: '#F7931E',
-        'orange-dark': '#D97B0E',
-        'orange-light': '#FDB044',
+        bg: '#070A0F',
+        bg2: '#0D1117',
+        surface: '#111720',
+        'surface-2': '#161D28',
+        ink: '#F5F7FA',
+        'ink-dim': '#89929E',
+        accent: '#249DFF',
+        'accent-d': '#1476D4',
+        'accent-l': '#6EDCFF',
       },
     },
   },

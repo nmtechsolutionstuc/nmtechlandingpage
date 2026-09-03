@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { SiteContent } from '../content/types'
-import { defaultContent, FONTS } from '../content/defaultContent'
+import { defaultContent } from '../content/defaultContent'
 
-const STORAGE_KEY = 'nmtech_content_v2'
+const STORAGE_KEY = 'nmtech_content_v3'
 
 // ─── Supabase REST helpers ────────────────────────────────────────────────────
 const SB_URL = import.meta.env.VITE_SUPABASE_URL
@@ -71,66 +71,20 @@ function deepMerge(defaults: SiteContent, saved: Partial<SiteContent>): SiteCont
     theme: { ...defaults.theme, ...saved.theme },
     sections: { ...defaults.sections, ...saved.sections },
     hero: { ...defaults.hero, ...saved.hero },
+    marquee: { ...defaults.marquee, ...saved.marquee },
+    problem: { ...defaults.problem, ...saved.problem },
+    industry: { ...defaults.industry, ...saved.industry },
+    differentiators: { ...defaults.differentiators, ...saved.differentiators },
+    beforeAfter: { ...defaults.beforeAfter, ...saved.beforeAfter },
+    pricing: { ...defaults.pricing, ...saved.pricing },
     about: { ...defaults.about, ...saved.about },
     cta: { ...defaults.cta, ...saved.cta },
     contact: { ...defaults.contact, ...saved.contact },
     footer: { ...defaults.footer, ...saved.footer },
     services: saved.services ?? defaults.services,
+    projects: saved.projects ?? defaults.projects,
+    process: saved.process ?? defaults.process,
     testimonials: saved.testimonials ?? defaults.testimonials,
-  }
-}
-
-// ─── Theme application ────────────────────────────────────────────────────────
-function hexToRgb(hex: string): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!r) return '247,147,30'
-  return `${parseInt(r[1], 16)},${parseInt(r[2], 16)},${parseInt(r[3], 16)}`
-}
-function darkenHex(hex: string, amount = 25): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!r) return hex
-  const ch = (n: string) => Math.max(0, parseInt(n, 16) - amount).toString(16).padStart(2, '0')
-  return `#${ch(r[1])}${ch(r[2])}${ch(r[3])}`
-}
-function lightenHex(hex: string, amount = 20): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!r) return hex
-  const ch = (n: string) => Math.min(255, parseInt(n, 16) + amount).toString(16).padStart(2, '0')
-  return `#${ch(r[1])}${ch(r[2])}${ch(r[3])}`
-}
-
-function applyTheme(theme: SiteContent['theme']) {
-  const root = document.documentElement
-  const aRgb = hexToRgb(theme.accentColor)
-  root.style.setProperty('--accent', theme.accentColor)
-  root.style.setProperty('--accent-d', darkenHex(theme.accentColor, 25))
-  root.style.setProperty('--accent-l', lightenHex(theme.accentColor, 20))
-  root.style.setProperty('--accent-rgb', aRgb)
-  root.style.setProperty('--accent-01', `rgba(${aRgb},0.08)`)
-  root.style.setProperty('--accent-02', `rgba(${aRgb},0.15)`)
-  root.style.setProperty('--accent-03', `rgba(${aRgb},0.25)`)
-  root.style.setProperty('--accent-shadow', `rgba(${aRgb},0.4)`)
-  root.style.setProperty('--accent-shadow-lg', `rgba(${aRgb},0.55)`)
-  root.style.setProperty('--bg', theme.bgColor)
-  root.style.setProperty('--bg-rgb', hexToRgb(theme.bgColor))
-  root.style.setProperty('--bg2', lightenHex(theme.bgColor, 8))
-  root.style.setProperty('--navy', theme.navyColor)
-  root.style.setProperty('--navy-rgb', hexToRgb(theme.navyColor))
-  root.style.setProperty('--head-from', theme.headingGradFrom)
-  root.style.setProperty('--head-to', theme.headingGradTo)
-  document.body.style.background = theme.bgColor
-
-  const fontDef = FONTS.find((f) => f.value === theme.fontFamily)
-  if (fontDef) {
-    let link = document.getElementById('dynamic-font') as HTMLLinkElement | null
-    if (!link) {
-      link = document.createElement('link')
-      link.id = 'dynamic-font'
-      link.rel = 'stylesheet'
-      document.head.appendChild(link)
-    }
-    link.href = `https://fonts.googleapis.com/css2?family=${fontDef.url}&display=swap`
-    document.body.style.fontFamily = `'${theme.fontFamily}', sans-serif`
   }
 }
 
@@ -157,8 +111,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<SiteContent>(loadLocal)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(hasRemote() ? 'syncing' : 'no-remote')
 
-  applyTheme(content.theme)
-
   async function syncFromRemote() {
     if (!hasRemote()) { setSyncStatus('no-remote'); return }
     setSyncStatus('syncing')
@@ -167,7 +119,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       const merged = deepMerge(defaultContent, remote)
       setContent(merged)
       saveLocal(merged)
-      applyTheme(merged.theme)
       setSyncStatus('synced')
     } else {
       setSyncStatus('error')
@@ -180,10 +131,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     syncFromRemote()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    applyTheme(content.theme)
-  }, [content.theme])
 
   const updateContent = async (newContent: SiteContent) => {
     setContent(newContent)
@@ -198,7 +145,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   const resetContent = () => {
     setContent(defaultContent)
     localStorage.removeItem(STORAGE_KEY)
-    applyTheme(defaultContent.theme)
     if (hasRemote()) pushRemote(defaultContent)
     setSyncStatus(hasRemote() ? 'synced' : 'no-remote')
   }

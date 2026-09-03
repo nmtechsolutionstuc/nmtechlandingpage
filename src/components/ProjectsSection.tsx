@@ -1,161 +1,101 @@
-import { useRef } from 'react'
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { ArrowUpRight, LayoutGrid } from 'lucide-react'
 import FadeIn from './ui/FadeIn'
+import { useContent } from '../context/ContentContext'
 
-const PROJECTS = [
-  {
-    num: '01',
-    category: 'Fitness / Gimnasio',
-    name: 'IronCore Performance',
-    image: '/projects/ironcoregym.jpg',
-    url: 'https://ironcoregym-nmtech.vercel.app/',
-    caption: 'Ideal para gimnasios, boxes o entrenadores que buscan una estética potente, oscura y motivadora.',
-  },
-  {
-    num: '02',
-    category: 'Servicios Tech / Corporativo',
-    name: 'NMTECH Solutions v1',
-    image: '/projects/nmtech-lp-v1.jpg',
-    url: 'https://nmtech-lp-v1.vercel.app/',
-    caption: 'Ideal para empresas de servicios tecnológicos que buscan un estilo oscuro, sobrio y corporativo.',
-  },
-  {
-    num: '03',
-    category: 'Servicios Tech / Datos & IA',
-    name: 'NMTECH Solutions v2',
-    image: '/projects/nmtech-lp-v2.jpg',
-    url: 'https://nmtech-lp-v2.vercel.app/',
-    caption: 'Ideal para negocios de datos, IA o desarrollo que quieran un toque técnico, con detalles tipo terminal/código.',
-  },
-  {
-    num: '04',
-    category: 'Servicios Tech / Minimalista',
-    name: 'NMTECH Solutions v3',
-    image: '/projects/nmtech-lp-v3.jpg',
-    url: 'https://nmtech-lp-v3.vercel.app/',
-    caption: 'Ideal para marcas que prefieren un estilo claro, limpio y minimalista en vez de temas oscuros.',
-  },
-  {
-    num: '05',
-    category: 'E-commerce / Tienda de Productos',
-    name: 'Dinax Tech',
-    image: '/projects/dinaxtech.jpg',
-    url: 'https://dinaxtech.vercel.app/',
-    caption: 'Ideal para tiendas y catálogos de productos físicos que necesitan mostrar categorías y consultar por WhatsApp.',
-  },
-]
-
-function ProjectCard({
-  project,
-  index,
-  progress,
-}: {
-  project: (typeof PROJECTS)[0]
-  index: number
-  progress: MotionValue<number>
-}) {
-  const total = PROJECTS.length
-  const targetScale = 1 - (total - 1 - index) * 0.04
-  const rangeStart = index / total
-  const rangeEnd = 1
-  const scale = useTransform(progress, [rangeStart, rangeEnd], [1, targetScale])
-
-  return (
-    <div className="flex items-center justify-center mb-10 sm:mb-14 last:mb-0">
-      <motion.div
-        className="w-full rounded-[36px] sm:rounded-[44px] md:rounded-[52px] border border-[#D7E2EA]/15 bg-[#060D1A] p-4 sm:p-6 md:p-8 overflow-hidden"
-        style={{ scale, transformOrigin: 'top center' }}
-      >
-        {/* Top row */}
-        <div className="flex items-center justify-between mb-4 md:mb-6 flex-wrap gap-3">
-          <div className="flex items-baseline gap-4">
-            <span
-              className="font-black hero-heading leading-none"
-              style={{ fontSize: 'clamp(2.5rem, 8vw, 7rem)' }}
-            >
-              {project.num}
-            </span>
-            <div>
-              <div className="text-[#F7931E] text-xs uppercase tracking-widest font-medium">
-                {project.category}
-              </div>
-              <div
-                className="text-white font-bold uppercase tracking-tight leading-none"
-                style={{ fontSize: 'clamp(1.1rem, 2.5vw, 2.2rem)' }}
-              >
-                {project.name}
-              </div>
-            </div>
-          </div>
-          <a
-            href={project.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-[#D7E2EA]/30 text-[#D7E2EA]/80 font-medium uppercase tracking-widest text-xs hover:bg-[#D7E2EA]/10 hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Ver sitio →
-          </a>
-        </div>
-
-        {/* Image */}
-        <a
-          href={project.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full rounded-[24px] sm:rounded-[32px] overflow-hidden bg-[#0E1A30]"
-        >
-          <img
-            src={project.image}
-            alt={project.name}
-            loading="lazy"
-            className="w-full object-cover object-top"
-            style={{ height: 'clamp(220px, 40vw, 460px)' }}
-          />
-        </a>
-
-        {/* Leyenda */}
-        <p className="text-[#D7E2EA]/60 text-sm sm:text-base leading-relaxed mt-4 md:mt-6 max-w-2xl">
-          {project.caption}
-        </p>
-      </motion.div>
-    </div>
-  )
-}
+const MAX_FEATURED = 4
 
 export default function ProjectsSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  })
+  const { content } = useContent()
+  const marked = content.projects.filter((p) => p.featured)
+  const featured = (marked.length ? marked : content.projects).slice(0, MAX_FEATURED)
+  const [hovered, setHovered] = useState<number | null>(null)
+
+  if (!featured.length) return null
 
   return (
-    <section
-      id="proyectos"
-      className="bg-[#060D1A] rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 relative z-20 px-5 sm:px-8 md:px-10 pb-32"
-    >
-      <div className="max-w-5xl mx-auto">
-        <FadeIn y={40} className="text-center pt-20 sm:pt-24 md:pt-32 mb-16 sm:mb-20 md:mb-28">
-          <span className="inline-block font-semibold text-xs tracking-[0.22em] uppercase text-[#F7931E] bg-[rgba(247,147,30,0.1)] border border-[rgba(247,147,30,0.2)] rounded-full px-4 py-2 mb-5">
-            Inspiración
-          </span>
-          <h2
-            className="hero-heading font-black uppercase leading-none tracking-tight"
-            style={{ fontSize: 'clamp(3rem, 12vw, 140px)' }}
-          >
-            Estilos que vas a aprender a crear
-          </h2>
-          <p className="text-[#D7E2EA]/60 font-medium mt-5 max-w-xl mx-auto" style={{ fontSize: 'clamp(0.95rem,1.5vw,1.1rem)' }}>
-            Referencias de diseño para inspirarte — al terminar vas a poder crear landing pages así vos mismo, gratis y con IA.
-          </p>
+    <section id="proyectos" className="px-6 md:px-10 py-24 md:py-36 overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-[1400px] mx-auto">
+        <FadeIn y={30} className="mb-16 sm:mb-20 max-w-2xl flex items-end justify-between flex-wrap gap-6">
+          <div>
+            <span className="font-medium text-xs tracking-[0.22em] uppercase text-accent">Portfolio</span>
+            <h2 className="font-display font-extrabold uppercase leading-[1.05] tracking-tight mt-4 heading-grad" style={{ fontSize: 'clamp(2.2rem,4.6vw,3.8rem)' }}>
+              Trabajos que hablan por nosotros.
+            </h2>
+          </div>
         </FadeIn>
-
-        <div ref={containerRef}>
-          {PROJECTS.map((project, i) => (
-            <ProjectCard key={i} project={project} index={i} progress={scrollYProgress} />
-          ))}
-        </div>
       </div>
+
+      <FadeIn delay={0.1}>
+        <div className="flex items-center overflow-x-auto no-scrollbar px-6 md:px-10 py-14" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex items-center mx-auto">
+            {featured.map((project, i) => {
+              const isHovered = hovered === i
+              const dim = hovered !== null && !isHovered
+              return (
+                <motion.a
+                  key={project.name + i}
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                  onFocus={() => setHovered(i)}
+                  onBlur={() => setHovered(null)}
+                  className="group relative shrink-0 rounded-[26px] overflow-hidden border border-white/14 no-underline"
+                  style={{
+                    width: 'min(70vw, 320px)',
+                    aspectRatio: '3 / 4',
+                    marginLeft: i === 0 ? 0 : 'min(-7vw, -46px)',
+                    background: 'var(--surface)',
+                    zIndex: isHovered ? 40 : i,
+                  }}
+                  animate={{
+                    scale: isHovered ? 1.08 : dim ? 0.94 : 1,
+                    rotate: isHovered ? 0 : i % 2 === 0 ? -3 : 3,
+                    y: isHovered ? -24 : 0,
+                  }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+                >
+                  <img src={project.image} alt={project.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-top" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/10" />
+                  <motion.div
+                    className="absolute inset-0 bg-black"
+                    animate={{ opacity: dim ? 0.65 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+
+                  <span className="absolute top-4 left-4 font-display font-extrabold text-white/70 text-2xl leading-none">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+
+                  <span className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center bg-white text-bg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <ArrowUpRight size={16} />
+                  </span>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <div className="text-accent text-[10px] uppercase tracking-widest font-semibold mb-1">{project.category}</div>
+                    <div className="font-display font-bold text-white leading-tight text-lg mb-1.5">{project.name}</div>
+                    <p className="text-white/70 text-xs leading-relaxed max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 transition-all duration-300 overflow-hidden">
+                      {project.caption}
+                    </p>
+                  </div>
+                </motion.a>
+              )
+            })}
+          </div>
+        </div>
+      </FadeIn>
+
+      <FadeIn delay={0.2} className="text-center mt-6">
+        <a
+          href="#todos-los-proyectos"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full font-semibold uppercase tracking-widest text-xs border border-white/15 text-ink hover:border-white/40 hover:-translate-y-0.5 transition-all duration-300"
+        >
+          <LayoutGrid size={15} /> Ver todos los proyectos
+        </a>
+      </FadeIn>
     </section>
   )
 }

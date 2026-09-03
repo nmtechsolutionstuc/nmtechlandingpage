@@ -3,38 +3,36 @@ import { useContent } from '../context/ContentContext'
 
 export default function TestimonialsSection() {
   const { content } = useContent()
+  const items = content.testimonials
+  if (!items?.length) return null
 
   return (
-    <section className="px-5 sm:px-8 md:px-10 py-24 md:py-32" style={{ background: 'var(--bg)' }}>
-      <div className="max-w-7xl mx-auto">
-        <FadeIn y={40} className="text-center mb-16">
-          <span className="inline-block font-semibold text-xs tracking-[0.22em] uppercase rounded-full px-4 py-2 mb-5" style={{ color: 'var(--accent)', background: 'var(--accent-01)', border: '1px solid var(--accent-03)' }}>
-            Resultados reales
-          </span>
-          <h2 className="hero-heading font-black uppercase leading-none tracking-tight" style={{ fontSize: 'clamp(2.5rem,8vw,7rem)' }}>
-            Clientes felices
+    <section className="px-6 md:px-10 py-24 md:py-36" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-[1400px] mx-auto">
+        <FadeIn y={30} className="mb-14 md:mb-16 max-w-2xl">
+          <span className="font-medium text-xs tracking-[0.22em] uppercase text-accent">Clientes</span>
+          <h2 className="font-display font-extrabold uppercase leading-[1.05] tracking-tight mt-4 heading-grad" style={{ fontSize: 'clamp(2.2rem,4.6vw,3.8rem)' }}>
+            Lo que dicen de nosotros.
           </h2>
         </FadeIn>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {content.testimonials.map((t, i) => (
-            <FadeIn key={i} delay={i * 0.08} y={30}>
-              <div className="glass-card rounded-2xl p-7 h-full flex flex-col gap-5 hover:-translate-y-2 transition-transform duration-300">
+          {items.map((t, i) => (
+            <FadeIn key={i} delay={i * 0.06} y={24}>
+              <div className="rounded-2xl p-7 h-full flex flex-col gap-5 border border-white/10 hover:-translate-y-1.5 transition-transform duration-300" style={{ background: 'var(--bg-2)' }}>
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, j) => (
-                    <span key={j} style={{ color: 'var(--accent)' }} className="text-base">★</span>
+                    <span key={j} className="text-accent text-base">★</span>
                   ))}
                 </div>
-                <p className="text-[#D7E2EA]/75 font-light leading-relaxed italic flex-1" style={{ fontSize: 'clamp(0.88rem,1.4vw,1rem)' }}>
-                  &ldquo;{t.text}&rdquo;
-                </p>
+                <p className="text-ink/80 leading-relaxed flex-1 text-sm">&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-sm border-2 shrink-0" style={{ background: `linear-gradient(135deg,var(--accent),var(--navy))`, borderColor: 'var(--accent-03)' }}>
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-sm shrink-0" style={{ background: `linear-gradient(135deg,var(--accent),var(--accent-d))` }}>
                     {t.initials}
                   </div>
                   <div>
-                    <div className="font-bold text-white text-sm">{t.name}</div>
-                    <div className="text-[#8A95A8] text-xs">{t.role}</div>
+                    <div className="font-bold text-ink text-sm">{t.name}</div>
+                    <div className="text-ink-dim text-xs">{t.role}</div>
                   </div>
                 </div>
               </div>

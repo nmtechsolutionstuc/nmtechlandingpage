@@ -3,28 +3,26 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useContent } from '../context/ContentContext'
 
-function LogoIcon() {
-  return (
-    <svg width="38" height="38" viewBox="0 0 44 44" fill="none">
-      <polygon points="22,2 40,12 40,32 22,42 4,32 4,12" fill="var(--navy)" stroke="var(--accent)" strokeWidth="1.5" />
-      <line x1="22" y1="2" x2="22" y2="7" stroke="var(--accent)" strokeWidth="1.5" />
-      <line x1="30" y1="5" x2="30" y2="10" stroke="var(--accent)" strokeWidth="1.5" />
-      <line x1="14" y1="5" x2="14" y2="10" stroke="var(--accent)" strokeWidth="1.5" />
-      <circle cx="22" cy="5" r="2" fill="var(--accent)" />
-      <circle cx="30" cy="9" r="2" fill="var(--accent)" />
-      <circle cx="14" cy="9" r="2" fill="var(--accent-l)" />
-      <text x="8" y="30" fontFamily="inherit" fontWeight="900" fontSize="18" fill="var(--accent)">N</text>
-      <text x="22" y="30" fontFamily="inherit" fontWeight="900" fontSize="18" fill="white">M</text>
-    </svg>
-  )
-}
-
 const links = [
-  { href: '#nosotros', label: 'Nosotros' },
+  { href: '#hero', label: 'Inicio' },
   { href: '#servicios', label: 'Servicios' },
-  { href: '#proyectos', label: 'Proyectos' },
+  { href: '#proyectos', label: 'Trabajos' },
+  { href: '#proceso', label: 'Proceso' },
+  { href: '#nosotros', label: 'Nosotros' },
   { href: '#contacto', label: 'Contacto' },
 ]
+
+function Logo({ text, subtext, imageUrl }: { text: string; subtext: string; imageUrl: string }) {
+  if (imageUrl) {
+    return <img src={imageUrl} alt={text} className="h-9 w-auto object-contain" />
+  }
+  return (
+    <span className="flex flex-col leading-none select-none">
+      <span className="font-display font-extrabold text-lg tracking-tight text-ink">{text}</span>
+      <span className="text-[9px] font-medium tracking-[0.32em] text-accent mt-0.5">{subtext?.toUpperCase()}</span>
+    </span>
+  )
+}
 
 export default function Navbar() {
   const { content } = useContent()
@@ -33,8 +31,9 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60)
+    const onScroll = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -43,33 +42,18 @@ export default function Navbar() {
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'py-3 backdrop-blur-xl border-b' : 'py-5'
-        }`}
-        style={scrolled ? { background: `${theme.bgColor}f2`, borderColor: 'var(--accent-03)' } : {}}
+        transition={{ duration: 0.6 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-3 backdrop-blur-xl border-b border-white/[0.06]' : 'py-6'}`}
+        style={scrolled ? { background: 'rgba(7,10,15,0.82)' } : {}}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between">
           <a href="#hero" className="flex items-center gap-2.5 no-underline">
-            {theme.logoImageUrl ? (
-              <img src={theme.logoImageUrl} alt={theme.logoText} className="h-10 w-auto object-contain" />
-            ) : (
-              <>
-                <LogoIcon />
-                <span className="font-black text-xl uppercase tracking-tight leading-none">
-                  <span style={{ color: 'var(--accent)' }}>{theme.logoText}</span>
-                  <span className="text-white">{theme.logoText === 'NMTECH' ? '' : ''}</span>
-                  <span className="text-xs font-medium tracking-[0.2em] ml-2 align-middle" style={{ color: 'var(--accent)', opacity: 0.5 }}>
-                    {theme.logoSubtext}
-                  </span>
-                </span>
-              </>
-            )}
+            <Logo text={theme.logoText} subtext={theme.logoSubtext} imageUrl={theme.logoImageUrl} />
           </a>
 
-          <div className="hidden md:flex items-center gap-9">
+          <div className="hidden lg:flex items-center gap-10">
             {links.map((l) => (
-              <a key={l.href} href={l.href} className="font-medium uppercase tracking-wider text-[#D7E2EA]/60 hover:text-[#D7E2EA] transition-colors duration-200 text-sm">
+              <a key={l.href} href={l.href} className="font-medium text-[13px] tracking-[0.08em] uppercase text-ink-dim hover:text-ink transition-colors duration-200">
                 {l.label}
               </a>
             ))}
@@ -77,18 +61,12 @@ export default function Navbar() {
 
           <a
             href="#contacto"
-            className="hidden md:inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white font-semibold uppercase tracking-widest text-sm hover:-translate-y-0.5 transition-all duration-300"
-            style={{
-              background: `linear-gradient(135deg, var(--accent), var(--accent-d))`,
-              boxShadow: '0 0 0 0 transparent',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 0 24px var(--accent-shadow)')}
-            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 0 0 0 transparent')}
+            className="hidden lg:inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-bg font-semibold text-[12px] tracking-[0.08em] uppercase bg-ink hover:bg-accent hover:text-white transition-all duration-300 hover:-translate-y-0.5"
           >
-            Empezar →
+            Hablemos de tu proyecto
           </a>
 
-          <button onClick={() => setOpen(!open)} className="md:hidden text-white p-2" aria-label="Menu">
+          <button onClick={() => setOpen(!open)} className="lg:hidden text-ink p-2 -mr-2" aria-label="Menú">
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -97,25 +75,32 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -16 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
+            exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.25 }}
-            className="fixed top-[62px] left-0 right-0 z-40 backdrop-blur-xl border-b px-6 py-6 flex flex-col gap-4 md:hidden"
-            style={{ background: `${theme.bgColor}f8`, borderColor: 'var(--accent-03)' }}
+            className="fixed top-[64px] left-0 right-0 z-40 backdrop-blur-2xl border-b border-white/[0.06] px-6 py-6 flex flex-col gap-1 lg:hidden"
+            style={{ background: 'rgba(7,10,15,0.97)' }}
           >
-            {links.map((l) => (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="font-medium uppercase tracking-wider text-[#D7E2EA] py-2 border-b border-white/5 text-base hover:opacity-80 transition-opacity">
+            {links.map((l, i) => (
+              <motion.a
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05, duration: 0.3 }}
+                className="font-medium tracking-wide text-ink py-3.5 border-b border-white/[0.06] text-base"
+              >
                 {l.label}
-              </a>
+              </motion.a>
             ))}
             <a
               href="#contacto"
               onClick={() => setOpen(false)}
-              className="mt-2 text-center py-3.5 rounded-full text-white font-semibold uppercase tracking-widest"
-              style={{ background: `linear-gradient(135deg, var(--accent), var(--accent-d))` }}
+              className="mt-5 text-center py-4 rounded-full text-bg font-semibold uppercase tracking-[0.08em] text-sm bg-accent"
             >
-              Empezar ahora →
+              Hablemos de tu proyecto
             </a>
           </motion.div>
         )}

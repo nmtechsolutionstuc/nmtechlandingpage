@@ -1,63 +1,67 @@
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 import FadeIn from './ui/FadeIn'
+import Icon from './ui/Icon'
 import { useContent } from '../context/ContentContext'
 
 export default function ServicesSection() {
   const { content } = useContent()
+  const [open, setOpen] = useState(0)
+  const services = content.services
 
   return (
-    <section id="servicios" className="bg-white rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 relative z-10 px-5 sm:px-8 md:px-10 py-20 sm:py-24 md:py-32">
-      <div className="max-w-5xl mx-auto">
-        <FadeIn y={40} className="text-center mb-16 sm:mb-20 md:mb-28">
-          <h2 className="font-black uppercase leading-none tracking-tight text-[#060D1A]" style={{ fontSize: 'clamp(3rem,12vw,140px)' }}>
-            Servicios
+    <section id="servicios" className="px-6 md:px-10 py-24 md:py-36" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-[1000px] mx-auto">
+        <FadeIn y={30} className="mb-14 md:mb-20 max-w-2xl">
+          <span className="font-medium text-xs tracking-[0.22em] uppercase text-accent">Lo que hacemos</span>
+          <h2 className="font-display font-extrabold uppercase leading-[1.05] tracking-tight mt-4 heading-grad" style={{ fontSize: 'clamp(2.2rem,4.6vw,3.8rem)' }}>
+            Todo lo que necesitás para tener una web profesional.
           </h2>
         </FadeIn>
 
         <div>
-          {content.services.map((s, i) => (
-            <FadeIn key={s.num} delay={i * 0.1} y={20}>
-              <div
-                className="flex items-start gap-6 sm:gap-10 py-8 sm:py-10 md:py-12 group cursor-default"
-                style={{
-                  borderTop: i === 0 ? '1px solid rgba(12,12,12,0.12)' : undefined,
-                  borderBottom: '1px solid rgba(12,12,12,0.12)',
-                }}
-              >
-                <span
-                  className="font-black text-[#060D1A] leading-none shrink-0 transition-colors duration-300"
-                  style={{ fontSize: 'clamp(3rem,10vw,120px)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#060D1A')}
-                >
-                  {s.num}
-                </span>
-                <div className="pt-2 sm:pt-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">{s.icon}</span>
-                    <h3 className="font-medium uppercase text-[#060D1A] transition-colors duration-300 group-hover:opacity-70" style={{ fontSize: 'clamp(1rem,2.2vw,2rem)' }}>
+          {services.map((s, i) => {
+            const isOpen = open === i
+            return (
+              <FadeIn key={s.num} delay={i * 0.04} y={14}>
+                <div style={{ borderTop: i === 0 ? '1px solid var(--border)' : undefined, borderBottom: '1px solid var(--border)' }}>
+                  <button
+                    onClick={() => setOpen(isOpen ? -1 : i)}
+                    className="w-full flex items-center gap-5 sm:gap-8 py-6 sm:py-7 text-left"
+                  >
+                    <span className={`font-display font-extrabold shrink-0 transition-colors duration-300 ${isOpen ? 'text-accent' : 'text-ink/25'}`} style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
+                      {s.num}
+                    </span>
+                    <span className={`font-display font-semibold uppercase transition-colors duration-300 flex-1 ${isOpen ? 'text-ink' : 'text-ink/70'}`} style={{ fontSize: 'clamp(1.05rem,1.8vw,1.5rem)' }}>
                       {s.name}
-                    </h3>
-                  </div>
-                  <p className="font-light leading-relaxed text-[#060D1A]/55 max-w-2xl" style={{ fontSize: 'clamp(0.85rem,1.5vw,1.15rem)' }}>
-                    {s.desc}
-                  </p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
+                    </span>
+                    <ChevronDown size={20} className={`shrink-0 text-ink-dim transition-transform duration-300 ${isOpen ? 'rotate-180 text-accent' : ''}`} />
+                  </button>
 
-        <FadeIn delay={0.5} y={20} className="mt-16 text-center">
-          <a
-            href={content.contact.storeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-white font-semibold uppercase tracking-widest text-sm hover:-translate-y-1 transition-all duration-300"
-            style={{ background: `linear-gradient(135deg,var(--accent),var(--accent-d))`, boxShadow: '0 4px 24px var(--accent-shadow)' }}
-          >
-            Ver tienda de productos →
-          </a>
-        </FadeIn>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex items-start gap-4 pb-7 sm:pb-8 pl-[3.2rem] sm:pl-[4.4rem] pr-8">
+                          <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--accent-02)' }}>
+                            <Icon name={s.icon} size={18} className="text-accent" />
+                          </span>
+                          <p className="text-ink-dim leading-relaxed text-sm sm:text-base max-w-xl pt-1.5">{s.desc}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </FadeIn>
+            )
+          })}
+        </div>
       </div>
     </section>
   )

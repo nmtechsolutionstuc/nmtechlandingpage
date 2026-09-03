@@ -1,20 +1,88 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { useContent } from '../context/ContentContext'
-import { SiteContent, ServiceItem, TestimonialItem, StatItem } from '../content/types'
-import { FONTS, THEME_PRESETS, defaultContent } from '../content/defaultContent'
+import { SiteContent, ServiceItem, TestimonialItem, StatItem, ProjectItem, IndustryItem, ProcessStep, DifferentiatorItem, PricingTier } from '../content/types'
+import { defaultContent } from '../content/defaultContent'
+import { ICON_KEYS } from '../components/ui/Icon'
+import Icon from '../components/ui/Icon'
 
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'nmtech2024'
 
 // ─── Shared input styles ────────────────────────────────────────────────────
-const inp = 'w-full bg-[#0E1A30] border border-[#1B2A4A] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#F7931E] transition-colors'
-const lbl = 'block text-[#8A95A8] text-xs uppercase tracking-widest font-medium mb-1.5'
+const inp = 'w-full bg-[#0D1117] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-accent transition-colors'
+const lbl = 'block text-ink-dim text-xs uppercase tracking-widest font-medium mb-1.5'
 const field = 'flex flex-col gap-0'
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className={field}>
       <label className={lbl}>{label}</label>
       {children}
+    </div>
+  )
+}
+
+function IconSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent-02)' }}>
+        <Icon name={value} size={16} className="text-accent" />
+      </span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className={inp}>
+        {ICON_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
+      </select>
+    </div>
+  )
+}
+
+// List of strings edited as one item per line — commits on blur to avoid re-render flicker mid-typing.
+function TextareaList({ label, value, onChange, placeholder }: { label: string; value: string[]; onChange: (v: string[]) => void; placeholder?: string }) {
+  const [raw, setRaw] = useState(value.join('\n'))
+  useEffect(() => { setRaw(value.join('\n')) }, [value])
+  return (
+    <Field label={label}>
+      <textarea
+        value={raw}
+        onChange={(e) => setRaw(e.target.value)}
+        onBlur={() => onChange(raw.split('\n').map((s) => s.trim()).filter(Boolean))}
+        className={`${inp} resize-y min-h-[100px]`}
+        placeholder={placeholder || 'Un ítem por línea'}
+      />
+    </Field>
+  )
+}
+
+// ─── Generic repeater ───────────────────────────────────────────────────────
+function Repeater<T>({
+  items, onChange, newItem, title, children,
+}: {
+  items: T[]
+  onChange: (items: T[]) => void
+  newItem: () => T
+  title: (item: T, i: number) => ReactNode
+  children: (item: T, set: (patch: Partial<T>) => void, i: number) => ReactNode
+}) {
+  const [open, setOpen] = useState<number | null>(0)
+  const set = (i: number, patch: Partial<T>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)))
+  const add = () => { onChange([...items, newItem()]); setOpen(items.length) }
+  const remove = (i: number) => onChange(items.filter((_, j) => j !== i))
+
+  return (
+    <div className="flex flex-col gap-3">
+      {items.map((item, i) => (
+        <div key={i} className="rounded-xl border border-white/8 overflow-hidden">
+          <button type="button" className="w-full flex items-center justify-between p-4 text-left hover:bg-white/4 transition-colors" onClick={() => setOpen(open === i ? null : i)}>
+            <span className="text-white font-medium text-sm truncate pr-3">{title(item, i)}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <button type="button" onClick={(e) => { e.stopPropagation(); remove(i) }} className="text-red-400 hover:text-red-300 text-sm px-2">Eliminar</button>
+              <span className="text-ink-dim">{open === i ? '▲' : '▼'}</span>
+            </div>
+          </button>
+          {open === i && <div className="p-4 pt-0 flex flex-col gap-4 border-t border-white/5">{children(item, (patch) => set(i, patch), i)}</div>}
+        </div>
+      ))}
+      <button type="button" onClick={add} className="p-3 rounded-xl border border-dashed border-white/20 text-ink-dim text-sm hover:border-accent/40 hover:text-white transition-colors">
+        + Agregar
+      </button>
     </div>
   )
 }
@@ -31,14 +99,14 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#060D1A]">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
       <div className="w-full max-w-sm mx-4">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg,#F7931E,#D97B0E)' }}>
+          <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-d))' }}>
             🔐
           </div>
-          <h1 className="font-black text-2xl text-white uppercase tracking-tight">NMTECH Admin</h1>
-          <p className="text-[#8A95A8] text-sm mt-1">Panel de administración</p>
+          <h1 className="font-display font-black text-2xl text-white uppercase tracking-tight">NMTECH Admin</h1>
+          <p className="text-ink-dim text-sm mt-1">Panel de administración</p>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-4">
           <input
@@ -50,7 +118,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
             autoFocus
           />
           {error && <p className="text-red-400 text-xs text-center">Contraseña incorrecta</p>}
-          <button type="submit" className="py-3 rounded-full text-white font-semibold uppercase tracking-widest text-sm transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,#F7931E,#D97B0E)' }}>
+          <button type="submit" className="py-3 rounded-full text-white font-semibold uppercase tracking-widest text-sm transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-d))' }}>
             Ingresar →
           </button>
         </form>
@@ -60,103 +128,30 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
 }
 
 // ─── Section tabs ────────────────────────────────────────────────────────────
-type Tab = 'apariencia' | 'logo' | 'secciones' | 'hero' | 'nosotros' | 'servicios' | 'testimonios' | 'cta' | 'contacto' | 'footer'
+type Tab =
+  | 'logo' | 'secciones' | 'hero' | 'marquee' | 'problem' | 'servicios' | 'proyectos'
+  | 'industry' | 'process' | 'differentiators' | 'beforeAfter' | 'pricing'
+  | 'testimonios' | 'contacto' | 'nosotros' | 'cta' | 'footer'
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: 'apariencia', icon: '🎨', label: 'Apariencia' },
   { id: 'logo', icon: '🖼️', label: 'Logo & Marca' },
   { id: 'secciones', icon: '👁️', label: 'Secciones' },
   { id: 'hero', icon: '🏠', label: 'Hero' },
-  { id: 'nosotros', icon: '👥', label: 'Nosotros' },
+  { id: 'marquee', icon: '🔠', label: 'Frase destacada' },
+  { id: 'problem', icon: '⚠️', label: 'El problema' },
   { id: 'servicios', icon: '⚡', label: 'Servicios' },
+  { id: 'proyectos', icon: '💼', label: 'Proyectos' },
+  { id: 'industry', icon: '🏪', label: 'Rubros' },
+  { id: 'process', icon: '🧭', label: 'Proceso' },
+  { id: 'differentiators', icon: '✅', label: 'Diferenciales' },
+  { id: 'beforeAfter', icon: '🔁', label: 'Antes / Después' },
+  { id: 'pricing', icon: '💳', label: 'Precios' },
   { id: 'testimonios', icon: '⭐', label: 'Testimonios' },
-  { id: 'cta', icon: '🎯', label: 'CTA' },
   { id: 'contacto', icon: '📞', label: 'Contacto' },
+  { id: 'nosotros', icon: '👥', label: 'Sobre NMTECH' },
+  { id: 'cta', icon: '🎯', label: 'CTA final' },
   { id: 'footer', icon: '🦶', label: 'Footer' },
 ]
-
-// ─── Apariencia ──────────────────────────────────────────────────────────────
-function AparienciaForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
-  const t = local.theme
-  const set = (patch: Partial<SiteContent['theme']>) => onChange({ ...local, theme: { ...t, ...patch } })
-
-  return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h3 className="text-white font-bold text-sm uppercase tracking-widest mb-4">Presets de tema</h3>
-        <div className="flex flex-wrap gap-3">
-          {THEME_PRESETS.map((p) => (
-            <button
-              key={p.label}
-              onClick={() => set(p.theme)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all hover:-translate-y-0.5"
-              style={{
-                background: p.theme.bgColor,
-                borderColor: p.theme.accentColor + '60',
-                color: p.theme.accentColor,
-              }}
-            >
-              <span>{p.emoji}</span> {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Color de fondo">
-          <div className="flex gap-2 items-center">
-            <input type="color" value={t.bgColor} onChange={(e) => set({ bgColor: e.target.value })} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-            <input type="text" value={t.bgColor} onChange={(e) => set({ bgColor: e.target.value })} className={inp} />
-          </div>
-        </Field>
-
-        <Field label="Color acento (naranja)">
-          <div className="flex gap-2 items-center">
-            <input type="color" value={t.accentColor} onChange={(e) => set({ accentColor: e.target.value })} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-            <input type="text" value={t.accentColor} onChange={(e) => set({ accentColor: e.target.value })} className={inp} />
-          </div>
-        </Field>
-
-        <Field label="Color navy (secundario)">
-          <div className="flex gap-2 items-center">
-            <input type="color" value={t.navyColor} onChange={(e) => set({ navyColor: e.target.value })} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-            <input type="text" value={t.navyColor} onChange={(e) => set({ navyColor: e.target.value })} className={inp} />
-          </div>
-        </Field>
-
-        <Field label="Fuente principal">
-          <select value={t.fontFamily} onChange={(e) => set({ fontFamily: e.target.value })} className={inp}>
-            {FONTS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
-          </select>
-        </Field>
-
-        <Field label="Heading gradiente — desde">
-          <div className="flex gap-2 items-center">
-            <input type="color" value={t.headingGradFrom} onChange={(e) => set({ headingGradFrom: e.target.value })} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-            <input type="text" value={t.headingGradFrom} onChange={(e) => set({ headingGradFrom: e.target.value })} className={inp} />
-          </div>
-        </Field>
-
-        <Field label="Heading gradiente — hasta">
-          <div className="flex gap-2 items-center">
-            <input type="color" value={t.headingGradTo} onChange={(e) => set({ headingGradTo: e.target.value })} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-            <input type="text" value={t.headingGradTo} onChange={(e) => set({ headingGradTo: e.target.value })} className={inp} />
-          </div>
-        </Field>
-      </div>
-
-      <div className="p-4 rounded-xl border border-white/10 text-sm text-[#8A95A8]">
-        <strong className="text-white">Vista previa del acento:</strong>
-        <div className="mt-3 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full" style={{ background: t.accentColor }} />
-          <div className="w-10 h-10 rounded-full border-2" style={{ borderColor: t.accentColor, background: 'transparent' }} />
-          <span className="font-bold text-xl" style={{ color: t.accentColor }}>NMTECH</span>
-          <button className="px-4 py-1.5 rounded-full text-white text-xs font-bold" style={{ background: t.accentColor }}>Botón</button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ─── Logo & Marca ─────────────────────────────────────────────────────────────
 function LogoForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
@@ -165,29 +160,19 @@ function LogoForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteC
 
   return (
     <div className="flex flex-col gap-6">
-      <Field label="URL de imagen de logo (dejar vacío para usar logo SVG)">
+      <p className="text-ink-dim text-sm">La paleta de color y la tipografía del sitio son fijas (marca NMTECH) para mantener una identidad visual consistente. Acá podés editar el logo.</p>
+      <Field label="URL de imagen de logo (dejar vacío para usar el logo de texto)">
         <input type="url" value={t.logoImageUrl} onChange={(e) => set({ logoImageUrl: e.target.value })} className={inp} placeholder="https://tu-dominio.com/logo.png" />
       </Field>
       {t.logoImageUrl && (
         <div className="p-4 rounded-xl border border-white/10">
-          <p className="text-[#8A95A8] text-xs mb-3 uppercase tracking-widest">Vista previa</p>
+          <p className="text-ink-dim text-xs mb-3 uppercase tracking-widest">Vista previa</p>
           <img src={t.logoImageUrl} alt="Logo preview" className="h-12 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
         </div>
       )}
       <div className="grid grid-cols-2 gap-5">
-        <Field label="Texto principal del logo">
-          <input type="text" value={t.logoText} onChange={(e) => set({ logoText: e.target.value })} className={inp} />
-        </Field>
-        <Field label="Subtexto del logo">
-          <input type="text" value={t.logoSubtext} onChange={(e) => set({ logoSubtext: e.target.value })} className={inp} />
-        </Field>
-      </div>
-      <div className="p-4 rounded-xl border border-white/10">
-        <p className="text-[#8A95A8] text-xs mb-3 uppercase tracking-widest">Vista previa del logo texto</p>
-        <div className="flex items-center gap-2">
-          <span className="font-black text-2xl uppercase tracking-tight" style={{ color: t.accentColor }}>{t.logoText}</span>
-          <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: t.accentColor, opacity: 0.5 }}>{t.logoSubtext}</span>
-        </div>
+        <Field label="Texto principal del logo"><input type="text" value={t.logoText} onChange={(e) => set({ logoText: e.target.value })} className={inp} /></Field>
+        <Field label="Subtexto del logo"><input type="text" value={t.logoSubtext} onChange={(e) => set({ logoSubtext: e.target.value })} className={inp} /></Field>
       </div>
     </div>
   )
@@ -195,13 +180,20 @@ function LogoForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteC
 
 // ─── Secciones ────────────────────────────────────────────────────────────────
 const SECTION_LABELS: Record<keyof SiteContent['sections'], string> = {
-  hero: 'Hero — Sección principal',
-  marquee: 'Marquee — Galería de proyectos',
-  about: 'Nosotros — Quiénes somos',
-  services: 'Servicios — Lista de servicios',
+  hero: 'Hero — Portada principal',
+  marquee: 'Frase destacada (tira de palabras)',
+  problem: 'El problema — Tu web habla antes que vos',
+  services: 'Servicios',
   projects: 'Proyectos — Portfolio',
-  testimonials: 'Testimonios — Clientes',
-  cta: 'CTA — Llamada a la acción',
+  industry: 'Imaginá tu negocio — Rubros',
+  process: 'Proceso — Cómo trabajamos',
+  differentiators: 'Diferenciales',
+  beforeAfter: 'Antes / Después',
+  pricing: 'Precios',
+  testimonials: 'Testimonios',
+  contact: 'Contacto — Formulario',
+  about: 'Sobre NMTECH',
+  ctaFinal: 'CTA final',
 }
 
 function SectionesForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
@@ -211,13 +203,13 @@ function SectionesForm({ local, onChange }: { local: SiteContent; onChange: (c: 
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[#8A95A8] text-sm mb-2">Activá o desactivá cada bloque de la landing page.</p>
+      <p className="text-ink-dim text-sm mb-2">Activá o desactivá cada bloque de la página.</p>
       {(Object.keys(local.sections) as (keyof SiteContent['sections'])[]).map((key) => (
-        <div key={key} className="flex items-center justify-between p-4 rounded-xl border border-white/8 hover:border-[#F7931E]/30 transition-colors">
+        <div key={key} className="flex items-center justify-between p-4 rounded-xl border border-white/8 hover:border-accent/30 transition-colors">
           <span className="text-white font-medium text-sm">{SECTION_LABELS[key]}</span>
           <button
             onClick={() => toggle(key)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${local.sections[key] ? 'bg-[#F7931E]' : 'bg-[#1B2A4A]'}`}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${local.sections[key] ? 'bg-accent' : 'bg-white/10'}`}
           >
             <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${local.sections[key] ? 'left-7' : 'left-1'}`} />
           </button>
@@ -231,31 +223,26 @@ function SectionesForm({ local, onChange }: { local: SiteContent; onChange: (c: 
 function HeroForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
   const h = local.hero
   const set = (patch: Partial<SiteContent['hero']>) => onChange({ ...local, hero: { ...h, ...patch } })
-  const setStat = (i: number, patch: Partial<StatItem>) => {
-    const stats = h.stats.map((s, j) => j === i ? { ...s, ...patch } : s)
-    set({ stats })
-  }
+  const setStat = (i: number, patch: Partial<StatItem>) => set({ stats: h.stats.map((s, j) => (j === i ? { ...s, ...patch } : s)) })
   const addStat = () => set({ stats: [...h.stats, { value: 100, suffix: '+', label: 'Nueva métrica' }] })
   const removeStat = (i: number) => set({ stats: h.stats.filter((_, j) => j !== i) })
 
   return (
     <div className="flex flex-col gap-5">
-      <Field label="Texto eyebrow"><input type="text" value={h.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} className={inp} /></Field>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Título — Línea 1"><input type="text" value={h.titleLine1} onChange={(e) => set({ titleLine1: e.target.value })} className={inp} /></Field>
-        <Field label="Título — Línea 2"><input type="text" value={h.titleLine2} onChange={(e) => set({ titleLine2: e.target.value })} className={inp} /></Field>
-      </div>
-      <Field label="Texto resaltado (naranja)"><input type="text" value={h.titleHighlight} onChange={(e) => set({ titleHighlight: e.target.value })} className={inp} /></Field>
+      <Field label="Texto eyebrow (arriba del título)"><input type="text" value={h.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} className={inp} /></Field>
+      <Field label="Título — línea 1"><input type="text" value={h.titleLine1} onChange={(e) => set({ titleLine1: e.target.value })} className={inp} /></Field>
+      <Field label="Título — línea destacada (color acento)"><input type="text" value={h.titleHighlight} onChange={(e) => set({ titleHighlight: e.target.value })} className={inp} /></Field>
       <Field label="Descripción"><textarea value={h.description} onChange={(e) => set({ description: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Field label="Botón principal"><input type="text" value={h.cta1Label} onChange={(e) => set({ cta1Label: e.target.value })} className={inp} /></Field>
         <Field label="Botón secundario"><input type="text" value={h.cta2Label} onChange={(e) => set({ cta2Label: e.target.value })} className={inp} /></Field>
       </div>
+      <TextareaList label="Indicadores de confianza (uno por línea)" value={h.trustBadges} onChange={(v) => set({ trustBadges: v })} />
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className={lbl} style={{ marginBottom: 0 }}>Estadísticas</span>
-          <button onClick={addStat} className="text-xs px-3 py-1.5 rounded-lg font-medium hover:opacity-80 transition-opacity" style={{ background: 'var(--accent-01)', color: 'var(--accent)', border: '1px solid var(--accent-03)' }}>+ Agregar</button>
+          <span className={lbl} style={{ marginBottom: 0 }}>Estadísticas (opcional, dejar vacío si no tenés métricas reales)</span>
+          <button onClick={addStat} className="text-xs px-3 py-1.5 rounded-lg font-medium hover:opacity-80 transition-opacity text-accent" style={{ background: 'var(--accent-01)', border: '1px solid var(--accent-03)' }}>+ Agregar</button>
         </div>
         <div className="flex flex-col gap-3">
           {h.stats.map((s, i) => (
@@ -272,118 +259,252 @@ function HeroForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteC
   )
 }
 
-// ─── Nosotros ─────────────────────────────────────────────────────────────────
-function NosotrosForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
-  const a = local.about
-  const set = (patch: Partial<SiteContent['about']>) => onChange({ ...local, about: { ...a, ...patch } })
+// ─── Marquee ──────────────────────────────────────────────────────────────────
+function MarqueeForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  return <TextareaList label="Palabras de la tira (una por línea)" value={local.marquee.keywords} onChange={(v) => onChange({ ...local, marquee: { keywords: v } })} />
+}
+
+// ─── Problema ─────────────────────────────────────────────────────────────────
+function ProblemForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const p = local.problem
+  const set = (patch: Partial<SiteContent['problem']>) => onChange({ ...local, problem: { ...p, ...patch } })
   return (
     <div className="flex flex-col gap-5">
-      <Field label="Heading"><input type="text" value={a.heading} onChange={(e) => set({ heading: e.target.value })} className={inp} /></Field>
-      <Field label="Texto principal"><textarea value={a.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[140px]`} /></Field>
-      <Field label="Texto del botón CTA"><input type="text" value={a.ctaLabel} onChange={(e) => set({ ctaLabel: e.target.value })} className={inp} /></Field>
+      <Field label="Eyebrow"><input type="text" value={p.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} className={inp} /></Field>
+      <Field label="Título"><input type="text" value={p.headline} onChange={(e) => set({ headline: e.target.value })} className={inp} /></Field>
+      <Field label="Texto"><textarea value={p.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[90px]`} /></Field>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="flex flex-col gap-5">
+          <Field label="Etiqueta columna izquierda"><input type="text" value={p.badLabel} onChange={(e) => set({ badLabel: e.target.value })} className={inp} /></Field>
+          <TextareaList label="Ítems (uno por línea)" value={p.badItems} onChange={(v) => set({ badItems: v })} />
+        </div>
+        <div className="flex flex-col gap-5">
+          <Field label="Etiqueta columna derecha"><input type="text" value={p.goodLabel} onChange={(e) => set({ goodLabel: e.target.value })} className={inp} /></Field>
+          <TextareaList label="Ítems (uno por línea)" value={p.goodItems} onChange={(v) => set({ goodItems: v })} />
+        </div>
+      </div>
     </div>
   )
 }
 
 // ─── Servicios ────────────────────────────────────────────────────────────────
 function ServiciosForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
-  const [open, setOpen] = useState<number | null>(0)
-  const set = (i: number, patch: Partial<ServiceItem>) => {
-    onChange({ ...local, services: local.services.map((s, j) => j === i ? { ...s, ...patch } : s) })
-  }
-  const add = () => onChange({ ...local, services: [...local.services, { num: String(local.services.length + 1).padStart(2, '0'), name: 'Nuevo servicio', desc: 'Descripción del servicio', icon: '✨' }] })
-  const remove = (i: number) => onChange({ ...local, services: local.services.filter((_, j) => j !== i) })
-
   return (
-    <div className="flex flex-col gap-3">
-      {local.services.map((s, i) => (
-        <div key={i} className="rounded-xl border border-white/8 overflow-hidden">
-          <button className="w-full flex items-center justify-between p-4 text-left hover:bg-white/4 transition-colors" onClick={() => setOpen(open === i ? null : i)}>
-            <div className="flex items-center gap-3">
-              <span className="text-xl">{s.icon}</span>
-              <span className="text-white font-medium">{s.num} — {s.name}</span>
+    <Repeater<ServiceItem>
+      items={local.services}
+      onChange={(services) => onChange({ ...local, services })}
+      newItem={() => ({ num: String(local.services.length + 1).padStart(2, '0'), name: 'Nuevo servicio', desc: 'Descripción del servicio', icon: 'custom' })}
+      title={(s) => `${s.num} — ${s.name}`}
+    >
+      {(s, set) => (
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Número"><input type="text" value={s.num} onChange={(e) => set({ num: e.target.value })} className={inp} /></Field>
+            <Field label="Nombre"><input type="text" value={s.name} onChange={(e) => set({ name: e.target.value })} className={inp} /></Field>
+          </div>
+          <Field label="Ícono"><IconSelect value={s.icon} onChange={(icon) => set({ icon })} /></Field>
+          <Field label="Descripción"><textarea value={s.desc} onChange={(e) => set({ desc: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
+        </>
+      )}
+    </Repeater>
+  )
+}
+
+// ─── Proyectos ────────────────────────────────────────────────────────────────
+function ProyectosForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const featuredCount = local.projects.filter((p) => p.featured).length
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-ink-dim text-sm">Cargá acá tus proyectos reales (los que ya tenés publicados). La imagen puede ser una URL o una ruta dentro de /public/projects.</p>
+      <p className="text-ink-dim text-sm">
+        Marcá <strong className="text-ink">"Destacado"</strong> en los que quieras mostrar en la pila de la portada (máximo 4 — hoy tenés <strong className={featuredCount > 4 ? 'text-red-400' : 'text-accent'}>{featuredCount}</strong>). El resto igual aparece en "Ver todos los proyectos".
+      </p>
+      <Repeater<ProjectItem>
+        items={local.projects}
+        onChange={(projects) => onChange({ ...local, projects })}
+        newItem={() => ({ category: 'Rubro / Servicio', name: 'Nombre del proyecto', image: '', url: '', caption: '', featured: false })}
+        title={(p) => `${p.featured ? '★ ' : ''}${p.name || 'Nuevo proyecto'}`}
+      >
+        {(p, set) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Nombre"><input type="text" value={p.name} onChange={(e) => set({ name: e.target.value })} className={inp} /></Field>
+              <Field label="Categoría / Rubro"><input type="text" value={p.category} onChange={(e) => set({ category: e.target.value })} className={inp} /></Field>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={(e) => { e.stopPropagation(); remove(i) }} className="text-red-400 hover:text-red-300 text-sm px-2">Eliminar</button>
-              <span className="text-[#8A95A8]">{open === i ? '▲' : '▼'}</span>
-            </div>
-          </button>
-          {open === i && (
-            <div className="p-4 pt-0 flex flex-col gap-4 border-t border-white/5">
-              <div className="grid grid-cols-3 gap-3">
-                <Field label="Número"><input type="text" value={s.num} onChange={(e) => set(i, { num: e.target.value })} className={inp} /></Field>
-                <Field label="Emoji/Icono"><input type="text" value={s.icon} onChange={(e) => set(i, { icon: e.target.value })} className={inp} /></Field>
-                <Field label="Nombre"><input type="text" value={s.name} onChange={(e) => set(i, { name: e.target.value })} className={`${inp}`} /></Field>
+            <Field label="Imagen (URL o /projects/archivo.jpg)"><input type="text" value={p.image} onChange={(e) => set({ image: e.target.value })} className={inp} placeholder="/projects/mi-proyecto.jpg" /></Field>
+            <Field label="Link del sitio publicado"><input type="url" value={p.url} onChange={(e) => set({ url: e.target.value })} className={inp} placeholder="https://..." /></Field>
+            <Field label="Descripción corta"><textarea value={p.caption} onChange={(e) => set({ caption: e.target.value })} className={`${inp} resize-y min-h-[70px]`} /></Field>
+            <label className="flex items-center gap-2 text-sm text-ink-dim">
+              <input type="checkbox" checked={p.featured} onChange={(e) => set({ featured: e.target.checked })} />
+              Destacado en la portada
+            </label>
+            {p.image && (
+              <div className="rounded-xl overflow-hidden border border-white/10">
+                <img src={p.image} alt="" className="w-full h-32 object-cover object-top" onError={(e) => { e.currentTarget.style.display = 'none' }} />
               </div>
-              <Field label="Descripción"><textarea value={s.desc} onChange={(e) => set(i, { desc: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
+            )}
+          </>
+        )}
+      </Repeater>
+    </div>
+  )
+}
+
+// ─── Rubros (Industry) ─────────────────────────────────────────────────────────
+function IndustryForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const d = local.industry
+  const set = (patch: Partial<SiteContent['industry']>) => onChange({ ...local, industry: { ...d, ...patch } })
+  return (
+    <div className="flex flex-col gap-5">
+      <Field label="Eyebrow"><input type="text" value={d.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} className={inp} /></Field>
+      <Field label="Título"><input type="text" value={d.headline} onChange={(e) => set({ headline: e.target.value })} className={inp} /></Field>
+      <Field label="Texto"><textarea value={d.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[70px]`} /></Field>
+      <Field label="Texto del botón final"><input type="text" value={d.ctaLabel} onChange={(e) => set({ ctaLabel: e.target.value })} className={inp} /></Field>
+      <Repeater<IndustryItem>
+        items={d.items}
+        onChange={(items) => set({ items })}
+        newItem={() => ({ icon: 'custom', label: 'Nuevo rubro' })}
+        title={(i) => i.label}
+      >
+        {(item, setItem) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Rubro"><input type="text" value={item.label} onChange={(e) => setItem({ label: e.target.value })} className={inp} /></Field>
+            <Field label="Ícono"><IconSelect value={item.icon} onChange={(icon) => setItem({ icon })} /></Field>
+          </div>
+        )}
+      </Repeater>
+    </div>
+  )
+}
+
+// ─── Proceso ──────────────────────────────────────────────────────────────────
+function ProcessForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  return (
+    <Repeater<ProcessStep>
+      items={local.process}
+      onChange={(process) => onChange({ ...local, process })}
+      newItem={() => ({ num: String(local.process.length + 1).padStart(2, '0'), title: 'Nuevo paso', desc: 'Descripción del paso' })}
+      title={(s) => `${s.num} — ${s.title}`}
+    >
+      {(s, set) => (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-3">
+            <Field label="N°"><input type="text" value={s.num} onChange={(e) => set({ num: e.target.value })} className={inp} /></Field>
+            <Field label="Título"><input type="text" value={s.title} onChange={(e) => set({ title: e.target.value })} className={inp} /></Field>
+          </div>
+          <Field label="Descripción"><textarea value={s.desc} onChange={(e) => set({ desc: e.target.value })} className={`${inp} resize-y min-h-[70px]`} /></Field>
+        </>
+      )}
+    </Repeater>
+  )
+}
+
+// ─── Diferenciales ─────────────────────────────────────────────────────────────
+function DifferentiatorsForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const d = local.differentiators
+  const set = (patch: Partial<SiteContent['differentiators']>) => onChange({ ...local, differentiators: { ...d, ...patch } })
+  return (
+    <div className="flex flex-col gap-5">
+      <Field label="Título"><input type="text" value={d.headline} onChange={(e) => set({ headline: e.target.value })} className={inp} /></Field>
+      <Field label="Texto"><textarea value={d.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[70px]`} /></Field>
+      <Repeater<DifferentiatorItem>
+        items={d.items}
+        onChange={(items) => set({ items })}
+        newItem={() => ({ icon: 'custom', title: 'Nuevo diferencial', desc: 'Descripción' })}
+        title={(i) => i.title}
+      >
+        {(item, setItem) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Título"><input type="text" value={item.title} onChange={(e) => setItem({ title: e.target.value })} className={inp} /></Field>
+              <Field label="Ícono"><IconSelect value={item.icon} onChange={(icon) => setItem({ icon })} /></Field>
             </div>
-          )}
+            <Field label="Descripción"><textarea value={item.desc} onChange={(e) => setItem({ desc: e.target.value })} className={`${inp} resize-y min-h-[60px]`} /></Field>
+          </>
+        )}
+      </Repeater>
+    </div>
+  )
+}
+
+// ─── Antes / Después ────────────────────────────────────────────────────────────
+function BeforeAfterForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const b = local.beforeAfter
+  const set = (patch: Partial<SiteContent['beforeAfter']>) => onChange({ ...local, beforeAfter: { ...b, ...patch } })
+  return (
+    <div className="flex flex-col gap-5">
+      <Field label="Eyebrow"><input type="text" value={b.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} className={inp} /></Field>
+      <Field label="Título"><input type="text" value={b.headline} onChange={(e) => set({ headline: e.target.value })} className={inp} /></Field>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="flex flex-col gap-5">
+          <Field label="Título columna 'antes'"><input type="text" value={b.beforeTitle} onChange={(e) => set({ beforeTitle: e.target.value })} className={inp} /></Field>
+          <TextareaList label="Ítems (uno por línea)" value={b.beforeItems} onChange={(v) => set({ beforeItems: v })} />
         </div>
-      ))}
-      <button onClick={add} className="p-3 rounded-xl border border-dashed border-white/20 text-[#8A95A8] text-sm hover:border-[#F7931E]/40 hover:text-white transition-colors">
-        + Agregar servicio
-      </button>
+        <div className="flex flex-col gap-5">
+          <Field label="Título columna 'después'"><input type="text" value={b.afterTitle} onChange={(e) => set({ afterTitle: e.target.value })} className={inp} /></Field>
+          <TextareaList label="Ítems (uno por línea)" value={b.afterItems} onChange={(v) => set({ afterItems: v })} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Precios ──────────────────────────────────────────────────────────────────
+function PricingForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const p = local.pricing
+  const set = (patch: Partial<SiteContent['pricing']>) => onChange({ ...local, pricing: { ...p, ...patch } })
+  return (
+    <div className="flex flex-col gap-5">
+      <Field label="Eyebrow"><input type="text" value={p.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} className={inp} /></Field>
+      <Field label="Título"><input type="text" value={p.headline} onChange={(e) => set({ headline: e.target.value })} className={inp} /></Field>
+      <Field label="Texto"><textarea value={p.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[60px]`} /></Field>
+      <Field label="Texto de los botones"><input type="text" value={p.ctaLabel} onChange={(e) => set({ ctaLabel: e.target.value })} className={inp} /></Field>
+      <Field label="Aclaración debajo de los planes"><input type="text" value={p.disclaimer} onChange={(e) => set({ disclaimer: e.target.value })} className={inp} /></Field>
+
+      <Repeater<PricingTier>
+        items={p.tiers}
+        onChange={(tiers) => set({ tiers })}
+        newItem={() => ({ name: 'Nuevo plan', desc: 'Descripción', features: ['Característica 1'], highlight: false })}
+        title={(t) => t.name}
+      >
+        {(tier, setTier) => (
+          <>
+            <Field label="Nombre"><input type="text" value={tier.name} onChange={(e) => setTier({ name: e.target.value })} className={inp} /></Field>
+            <Field label="Descripción"><input type="text" value={tier.desc} onChange={(e) => setTier({ desc: e.target.value })} className={inp} /></Field>
+            <TextareaList label="Características (una por línea)" value={tier.features} onChange={(features) => setTier({ features })} />
+            <label className="flex items-center gap-2 text-sm text-ink-dim">
+              <input type="checkbox" checked={tier.highlight} onChange={(e) => setTier({ highlight: e.target.checked })} />
+              Destacar este plan ("más elegido")
+            </label>
+          </>
+        )}
+      </Repeater>
     </div>
   )
 }
 
 // ─── Testimonios ──────────────────────────────────────────────────────────────
 function TestimoniosForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
-  const [open, setOpen] = useState<number | null>(0)
-  const set = (i: number, patch: Partial<TestimonialItem>) => {
-    onChange({ ...local, testimonials: local.testimonials.map((t, j) => j === i ? { ...t, ...patch } : t) })
-  }
-  const add = () => onChange({ ...local, testimonials: [...local.testimonials, { initials: 'XX', name: 'Nombre Apellido', role: 'Rol, País', text: 'Testimonio del cliente...' }] })
-  const remove = (i: number) => onChange({ ...local, testimonials: local.testimonials.filter((_, j) => j !== i) })
-
   return (
-    <div className="flex flex-col gap-3">
-      {local.testimonials.map((t, i) => (
-        <div key={i} className="rounded-xl border border-white/8 overflow-hidden">
-          <button className="w-full flex items-center justify-between p-4 text-left hover:bg-white/4 transition-colors" onClick={() => setOpen(open === i ? null : i)}>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0" style={{ background: 'linear-gradient(135deg,var(--accent),var(--navy))' }}>{t.initials}</div>
-              <span className="text-white font-medium">{t.name}</span>
-              <span className="text-[#8A95A8] text-sm">{t.role}</span>
+    <div className="flex flex-col gap-4">
+      <p className="text-ink-dim text-sm">Solo agregá testimonios de clientes reales. Esta sección se muestra oculta hasta que la actives en "Secciones".</p>
+      <Repeater<TestimonialItem>
+        items={local.testimonials}
+        onChange={(testimonials) => onChange({ ...local, testimonials })}
+        newItem={() => ({ initials: 'XX', name: 'Nombre Apellido', role: 'Rol, ciudad', text: 'Testimonio del cliente...' })}
+        title={(t) => t.name}
+      >
+        {(t, set) => (
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <Field label="Iniciales"><input type="text" value={t.initials} onChange={(e) => set({ initials: e.target.value })} className={inp} maxLength={3} /></Field>
+              <Field label="Nombre"><input type="text" value={t.name} onChange={(e) => set({ name: e.target.value })} className={inp} /></Field>
+              <Field label="Rol / Ciudad"><input type="text" value={t.role} onChange={(e) => set({ role: e.target.value })} className={inp} /></Field>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={(e) => { e.stopPropagation(); remove(i) }} className="text-red-400 hover:text-red-300 text-sm px-2">Eliminar</button>
-              <span className="text-[#8A95A8]">{open === i ? '▲' : '▼'}</span>
-            </div>
-          </button>
-          {open === i && (
-            <div className="p-4 pt-0 flex flex-col gap-4 border-t border-white/5">
-              <div className="grid grid-cols-3 gap-3">
-                <Field label="Iniciales"><input type="text" value={t.initials} onChange={(e) => set(i, { initials: e.target.value })} className={inp} maxLength={3} /></Field>
-                <Field label="Nombre"><input type="text" value={t.name} onChange={(e) => set(i, { name: e.target.value })} className={inp} /></Field>
-                <Field label="Rol / País"><input type="text" value={t.role} onChange={(e) => set(i, { role: e.target.value })} className={inp} /></Field>
-              </div>
-              <Field label="Testimonio"><textarea value={t.text} onChange={(e) => set(i, { text: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
-            </div>
-          )}
-        </div>
-      ))}
-      <button onClick={add} className="p-3 rounded-xl border border-dashed border-white/20 text-[#8A95A8] text-sm hover:border-[#F7931E]/40 hover:text-white transition-colors">
-        + Agregar testimonio
-      </button>
-    </div>
-  )
-}
-
-// ─── CTA ──────────────────────────────────────────────────────────────────────
-function CTAForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
-  const c = local.cta
-  const set = (patch: Partial<SiteContent['cta']>) => onChange({ ...local, cta: { ...c, ...patch } })
-  return (
-    <div className="flex flex-col gap-5">
-      <Field label="Tag (etiqueta pequeña)"><input type="text" value={c.tag} onChange={(e) => set({ tag: e.target.value })} className={inp} /></Field>
-      <Field label="Título línea 1"><input type="text" value={c.titleLine1} onChange={(e) => set({ titleLine1: e.target.value })} className={inp} /></Field>
-      <Field label="Título resaltado (naranja)"><input type="text" value={c.titleHighlight} onChange={(e) => set({ titleHighlight: e.target.value })} className={inp} /></Field>
-      <Field label="Descripción"><textarea value={c.description} onChange={(e) => set({ description: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Botón 1 (WhatsApp)"><input type="text" value={c.cta1Label} onChange={(e) => set({ cta1Label: e.target.value })} className={inp} /></Field>
-        <Field label="Botón 2 (Tienda)"><input type="text" value={c.cta2Label} onChange={(e) => set({ cta2Label: e.target.value })} className={inp} /></Field>
-      </div>
+            <Field label="Testimonio"><textarea value={t.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
+          </>
+        )}
+      </Repeater>
     </div>
   )
 }
@@ -394,18 +515,51 @@ function ContactoForm({ local, onChange }: { local: SiteContent; onChange: (c: S
   const set = (patch: Partial<SiteContent['contact']>) => onChange({ ...local, contact: { ...c, ...patch } })
   return (
     <div className="flex flex-col gap-5">
+      <Field label="Título"><input type="text" value={c.headline} onChange={(e) => set({ headline: e.target.value })} className={inp} /></Field>
+      <Field label="Texto"><textarea value={c.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[70px]`} /></Field>
       <Field label="WhatsApp (con código de país, ej: +543865468239)"><input type="text" value={c.whatsapp} onChange={(e) => set({ whatsapp: e.target.value })} className={inp} /></Field>
       <Field label="Email"><input type="email" value={c.email} onChange={(e) => set({ email: e.target.value })} className={inp} /></Field>
-      <Field label="URL Tienda de productos"><input type="url" value={c.storeUrl} onChange={(e) => set({ storeUrl: e.target.value })} className={inp} /></Field>
+      <Field label="Ubicación"><input type="text" value={c.location} onChange={(e) => set({ location: e.target.value })} className={inp} /></Field>
       <Field label="Usuario de Instagram (sin @)"><input type="text" value={c.instagramUser} onChange={(e) => set({ instagramUser: e.target.value })} className={inp} /></Field>
       <Field label="Usuario de TikTok (sin @)"><input type="text" value={c.tiktokUser} onChange={(e) => set({ tiktokUser: e.target.value })} className={inp} /></Field>
       <div className="p-4 rounded-xl border border-white/10 text-sm">
-        <p className="text-[#8A95A8] text-xs uppercase tracking-widest mb-3">Links generados</p>
+        <p className="text-ink-dim text-xs uppercase tracking-widest mb-3">Links generados</p>
         <div className="flex flex-col gap-2">
-          <a href={`https://wa.me/${c.whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="text-[#F7931E] hover:underline text-xs break-all">WhatsApp: https://wa.me/{c.whatsapp.replace(/\D/g,'')}</a>
-          <a href={`https://www.instagram.com/${c.instagramUser}`} target="_blank" rel="noopener noreferrer" className="text-[#F7931E] hover:underline text-xs break-all">Instagram: @{c.instagramUser}</a>
-          <a href={`https://www.tiktok.com/@${c.tiktokUser}`} target="_blank" rel="noopener noreferrer" className="text-[#F7931E] hover:underline text-xs break-all">TikTok: @{c.tiktokUser}</a>
+          <a href={`https://wa.me/${c.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">WhatsApp: https://wa.me/{c.whatsapp.replace(/\D/g, '')}</a>
+          <a href={`https://www.instagram.com/${c.instagramUser}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">Instagram: @{c.instagramUser}</a>
+          <a href={`https://www.tiktok.com/@${c.tiktokUser}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">TikTok: @{c.tiktokUser}</a>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Sobre NMTECH ───────────────────────────────────────────────────────────────
+function NosotrosForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const a = local.about
+  const set = (patch: Partial<SiteContent['about']>) => onChange({ ...local, about: { ...a, ...patch } })
+  return (
+    <div className="flex flex-col gap-5">
+      <Field label="Título"><input type="text" value={a.heading} onChange={(e) => set({ heading: e.target.value })} className={inp} /></Field>
+      <Field label="Texto principal"><textarea value={a.text} onChange={(e) => set({ text: e.target.value })} className={`${inp} resize-y min-h-[140px]`} /></Field>
+      <Field label="Texto del botón CTA"><input type="text" value={a.ctaLabel} onChange={(e) => set({ ctaLabel: e.target.value })} className={inp} /></Field>
+    </div>
+  )
+}
+
+// ─── CTA final ──────────────────────────────────────────────────────────────────
+function CTAForm({ local, onChange }: { local: SiteContent; onChange: (c: SiteContent) => void }) {
+  const c = local.cta
+  const set = (patch: Partial<SiteContent['cta']>) => onChange({ ...local, cta: { ...c, ...patch } })
+  return (
+    <div className="flex flex-col gap-5">
+      <Field label="Tag (etiqueta pequeña)"><input type="text" value={c.tag} onChange={(e) => set({ tag: e.target.value })} className={inp} /></Field>
+      <Field label="Título línea 1"><input type="text" value={c.titleLine1} onChange={(e) => set({ titleLine1: e.target.value })} className={inp} /></Field>
+      <Field label="Título línea destacada"><input type="text" value={c.titleHighlight} onChange={(e) => set({ titleHighlight: e.target.value })} className={inp} /></Field>
+      <Field label="Descripción"><textarea value={c.description} onChange={(e) => set({ description: e.target.value })} className={`${inp} resize-y min-h-[80px]`} /></Field>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <Field label="Botón 1"><input type="text" value={c.cta1Label} onChange={(e) => set({ cta1Label: e.target.value })} className={inp} /></Field>
+        <Field label="Botón 2 (WhatsApp)"><input type="text" value={c.cta2Label} onChange={(e) => set({ cta2Label: e.target.value })} className={inp} /></Field>
       </div>
     </div>
   )
@@ -434,7 +588,7 @@ function exportJSON(content: SiteContent) {
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
 export default function AdminPage() {
   const [authed, setAuthed] = useState(sessionStorage.getItem('nm_admin') === '1')
-  const [tab, setTab] = useState<Tab>('apariencia')
+  const [tab, setTab] = useState<Tab>('secciones')
   const { content, updateContent, resetContent, syncStatus } = useContent()
   const [local, setLocal] = useState<SiteContent>(content)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving'>('saved')
@@ -444,10 +598,8 @@ export default function AdminPage() {
   const updateRef = useRef(updateContent)
   const hasPending = useRef(false)
 
-  // Keep refs current without causing handleChange recreation
   useEffect(() => { updateRef.current = updateContent }, [updateContent])
 
-  // When content changes from outside (remote fetch / reset) and we have no pending edits, sync local
   useEffect(() => {
     if (!hasPending.current) {
       setLocal(content)
@@ -455,7 +607,6 @@ export default function AdminPage() {
     }
   }, [content])
 
-  // Flush any pending debounced save before unmount so no edits are lost
   useEffect(() => {
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current)
@@ -463,7 +614,6 @@ export default function AdminPage() {
     }
   }, [])
 
-  // Stable callback — uses refs so it never needs to be recreated
   const handleChange = useCallback((newContent: SiteContent) => {
     localRef.current = newContent
     hasPending.current = true
@@ -490,53 +640,58 @@ export default function AdminPage() {
   if (!authed) return <AdminLogin onLogin={() => setAuthed(true)} />
 
   const FORM: Record<Tab, React.ReactNode> = {
-    apariencia: <AparienciaForm local={local} onChange={handleChange} />,
     logo: <LogoForm local={local} onChange={handleChange} />,
     secciones: <SectionesForm local={local} onChange={handleChange} />,
     hero: <HeroForm local={local} onChange={handleChange} />,
-    nosotros: <NosotrosForm local={local} onChange={handleChange} />,
+    marquee: <MarqueeForm local={local} onChange={handleChange} />,
+    problem: <ProblemForm local={local} onChange={handleChange} />,
     servicios: <ServiciosForm local={local} onChange={handleChange} />,
+    proyectos: <ProyectosForm local={local} onChange={handleChange} />,
+    industry: <IndustryForm local={local} onChange={handleChange} />,
+    process: <ProcessForm local={local} onChange={handleChange} />,
+    differentiators: <DifferentiatorsForm local={local} onChange={handleChange} />,
+    beforeAfter: <BeforeAfterForm local={local} onChange={handleChange} />,
+    pricing: <PricingForm local={local} onChange={handleChange} />,
     testimonios: <TestimoniosForm local={local} onChange={handleChange} />,
-    cta: <CTAForm local={local} onChange={handleChange} />,
     contacto: <ContactoForm local={local} onChange={handleChange} />,
+    nosotros: <NosotrosForm local={local} onChange={handleChange} />,
+    cta: <CTAForm local={local} onChange={handleChange} />,
     footer: <FooterForm local={local} onChange={handleChange} />,
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#030810] text-white" style={{ fontFamily: 'Kanit,sans-serif' }}>
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0" style={{ background: '#060D1A' }}>
+    <div className="min-h-screen flex flex-col text-white" style={{ background: 'var(--bg-2)', fontFamily: 'Inter,sans-serif' }}>
+      <header className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0" style={{ background: 'var(--bg)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black" style={{ background: 'linear-gradient(135deg,#F7931E,#D97B0E)' }}>N</div>
-          <span className="font-black text-sm uppercase tracking-widest">NMTECH <span className="text-[#F7931E]">Admin</span></span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black" style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-d))' }}>N</div>
+          <span className="font-display font-black text-sm uppercase tracking-widest">NMTECH <span className="text-accent">Admin</span></span>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className={`text-xs px-3 py-1 rounded-full font-medium ${saveStatus === 'saved' ? 'text-green-400 bg-green-400/10' : saveStatus === 'saving' ? 'text-yellow-400 bg-yellow-400/10' : 'text-orange-400 bg-orange-400/10'}`}>
+          <span className={`text-xs px-3 py-1 rounded-full font-medium ${saveStatus === 'saved' ? 'text-green-400 bg-green-400/10' : saveStatus === 'saving' ? 'text-yellow-400 bg-yellow-400/10' : 'text-accent bg-accent/10'}`}>
             {saveStatus === 'saved' ? '✓ Guardado' : saveStatus === 'saving' ? '⟳ Guardando...' : '● Sin guardar'}
           </span>
-          <span className={`text-xs px-3 py-1 rounded-full font-medium ${syncStatus === 'synced' ? 'text-blue-400 bg-blue-400/10' : syncStatus === 'syncing' ? 'text-yellow-400 bg-yellow-400/10' : syncStatus === 'error' ? 'text-red-400 bg-red-400/10' : 'text-[#8A95A8] bg-white/5'}`}>
+          <span className={`text-xs px-3 py-1 rounded-full font-medium ${syncStatus === 'synced' ? 'text-blue-400 bg-blue-400/10' : syncStatus === 'syncing' ? 'text-yellow-400 bg-yellow-400/10' : syncStatus === 'error' ? 'text-red-400 bg-red-400/10' : 'text-ink-dim bg-white/5'}`}>
             {syncStatus === 'synced' ? '☁ Supabase OK' : syncStatus === 'syncing' ? '⟳ Sincronizando...' : syncStatus === 'error' ? '✗ Error Supabase' : '○ Sin remoto'}
           </span>
-          <a href="/" target="_blank" rel="noopener noreferrer" className="text-xs px-4 py-2 rounded-full border border-white/20 text-[#D7E2EA] hover:bg-white/5 transition-colors">
+          <a href="/" target="_blank" rel="noopener noreferrer" className="text-xs px-4 py-2 rounded-full border border-white/20 text-ink hover:bg-white/5 transition-colors">
             Ver sitio →
           </a>
-          <button onClick={() => { sessionStorage.removeItem('nm_admin'); setAuthed(false) }} className="text-xs px-4 py-2 rounded-full border border-white/10 text-[#8A95A8] hover:text-white hover:border-white/30 transition-colors">
+          <button onClick={() => { sessionStorage.removeItem('nm_admin'); setAuthed(false) }} className="text-xs px-4 py-2 rounded-full border border-white/10 text-ink-dim hover:text-white hover:border-white/30 transition-colors">
             Cerrar sesión
           </button>
         </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-56 shrink-0 border-r border-white/8 flex flex-col overflow-y-auto" style={{ background: '#060D1A' }}>
+        <aside className="w-56 shrink-0 border-r border-white/8 flex flex-col overflow-y-auto" style={{ background: 'var(--bg)' }}>
           <nav className="flex flex-col gap-1 p-3 flex-1">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all ${tab === t.id ? 'text-white' : 'text-[#8A95A8] hover:text-white hover:bg-white/4'}`}
-                style={tab === t.id ? { background: 'var(--accent-01)', color: 'var(--accent)' } : {}}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all ${tab === t.id ? 'text-accent' : 'text-ink-dim hover:text-white hover:bg-white/4'}`}
+                style={tab === t.id ? { background: 'var(--accent-01)' } : {}}
               >
                 <span className="text-base">{t.icon}</span>
                 {t.label}
@@ -545,7 +700,7 @@ export default function AdminPage() {
           </nav>
 
           <div className="p-3 flex flex-col gap-2 border-t border-white/8">
-            <button onClick={() => exportJSON(local)} className="w-full text-xs py-2.5 px-3 rounded-xl border border-white/15 text-[#8A95A8] hover:text-white hover:border-white/30 transition-colors text-left">
+            <button onClick={() => exportJSON(local)} className="w-full text-xs py-2.5 px-3 rounded-xl border border-white/15 text-ink-dim hover:text-white hover:border-white/30 transition-colors text-left">
               📥 Exportar JSON
             </button>
             <button onClick={handleReset} className="w-full text-xs py-2.5 px-3 rounded-xl border border-red-900/40 text-red-400 hover:text-red-300 hover:border-red-500/40 transition-colors text-left">
@@ -554,12 +709,11 @@ export default function AdminPage() {
           </div>
         </aside>
 
-        {/* Main content */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-6">
               <span className="text-2xl">{TABS.find((t) => t.id === tab)?.icon}</span>
-              <h2 className="font-black text-xl uppercase tracking-tight">{TABS.find((t) => t.id === tab)?.label}</h2>
+              <h2 className="font-display font-black text-xl uppercase tracking-tight">{TABS.find((t) => t.id === tab)?.label}</h2>
             </div>
             {FORM[tab]}
           </div>
