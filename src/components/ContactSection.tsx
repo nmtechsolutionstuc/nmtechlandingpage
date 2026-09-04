@@ -116,7 +116,7 @@ export default function ContactSection() {
                 <div className="mb-6">
                   <label className={labelCls}>¿Qué necesitás?</label>
                   <select value={form.need} onChange={(e) => set('need', e.target.value)} className={`${inputCls} appearance-none cursor-pointer`}>
-                    {NEEDS.map((n) => <option key={n} value={n} className="bg-[#111720]">{n}</option>)}
+                    {NEEDS.map((n) => <option key={n} value={n} className="bg-[#131313]">{n}</option>)}
                   </select>
                 </div>
 

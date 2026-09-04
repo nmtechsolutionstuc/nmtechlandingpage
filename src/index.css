@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --bg: #070A0F;
-  --bg-2: #0D1117;
-  --surface: #111720;
-  --surface-2: #161D28;
+  --bg: #000000;
+  --bg-2: #0A0A0A;
+  --surface: #131313;
+  --surface-2: #1C1C1C;
   --border: rgba(245, 247, 250, 0.08);
   --border-strong: rgba(245, 247, 250, 0.14);
 
@@ -54,7 +54,7 @@ h1, h2, h3, h4, .font-display {
 }
 
 .glass-card {
-  background: rgba(17, 23, 32, 0.6);
+  background: rgba(19, 19, 19, 0.6);
   border: 1px solid var(--border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);

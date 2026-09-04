@@ -8,7 +8,7 @@ import Icon from '../components/ui/Icon'
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'nmtech2024'
 
 // ─── Shared input styles ────────────────────────────────────────────────────
-const inp = 'w-full bg-[#0D1117] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-accent transition-colors'
+const inp = 'w-full bg-[#0A0A0A] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-accent transition-colors'
 const lbl = 'block text-ink-dim text-xs uppercase tracking-widest font-medium mb-1.5'
 const field = 'flex flex-col gap-0'
 
