@@ -522,12 +522,14 @@ function ContactoForm({ local, onChange }: { local: SiteContent; onChange: (c: S
       <Field label="Ubicación"><input type="text" value={c.location} onChange={(e) => set({ location: e.target.value })} className={inp} /></Field>
       <Field label="Usuario de Instagram (sin @)"><input type="text" value={c.instagramUser} onChange={(e) => set({ instagramUser: e.target.value })} className={inp} /></Field>
       <Field label="Usuario de TikTok (sin @)"><input type="text" value={c.tiktokUser} onChange={(e) => set({ tiktokUser: e.target.value })} className={inp} /></Field>
+      <Field label="Página de Facebook (usuario o nombre de página, ej: nmtechsolutions)"><input type="text" value={c.facebookUser} onChange={(e) => set({ facebookUser: e.target.value })} className={inp} /></Field>
       <div className="p-4 rounded-xl border border-white/10 text-sm">
         <p className="text-ink-dim text-xs uppercase tracking-widest mb-3">Links generados</p>
         <div className="flex flex-col gap-2">
           <a href={`https://wa.me/${c.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">WhatsApp: https://wa.me/{c.whatsapp.replace(/\D/g, '')}</a>
           <a href={`https://www.instagram.com/${c.instagramUser}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">Instagram: @{c.instagramUser}</a>
           <a href={`https://www.tiktok.com/@${c.tiktokUser}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">TikTok: @{c.tiktokUser}</a>
+          {c.facebookUser && <a href={`https://www.facebook.com/${c.facebookUser}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs break-all">Facebook: https://www.facebook.com/{c.facebookUser}</a>}
         </div>
       </div>
     </div>

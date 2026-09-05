@@ -198,6 +198,7 @@ export const defaultContent: SiteContent = {
     storeUrl: 'https://nmtech5.mitiendanube.com/productos/',
     instagramUser: 'nmtechsolutions',
     tiktokUser: 'njmartinez98',
+    facebookUser: '',
     location: 'Argentina',
   },
   footer: {

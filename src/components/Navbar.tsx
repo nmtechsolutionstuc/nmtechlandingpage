@@ -12,6 +12,8 @@ const links = [
   { href: '#contacto', label: 'Contacto' },
 ]
 
+const EBOOKS_URL = 'https://ebooks.nmtech.com.ar/'
+
 function Logo({ text, subtext, imageUrl }: { text: string; subtext: string; imageUrl: string }) {
   if (imageUrl) {
     return <img src={imageUrl} alt={text} className="h-9 w-auto object-contain" />
@@ -59,12 +61,22 @@ export default function Navbar() {
             ))}
           </div>
 
-          <a
-            href="#contacto"
-            className="hidden lg:inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-bg font-semibold text-[12px] tracking-[0.08em] uppercase bg-ink hover:bg-accent hover:text-white transition-all duration-300 hover:-translate-y-0.5"
-          >
-            Hablemos de tu proyecto
-          </a>
+          <div className="hidden lg:flex items-center gap-3">
+            <a
+              href={EBOOKS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-[12px] tracking-[0.08em] uppercase border border-white/15 text-ink hover:border-white/40 transition-all duration-300 hover:-translate-y-0.5"
+            >
+              Ebooks
+            </a>
+            <a
+              href="#contacto"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-bg font-semibold text-[12px] tracking-[0.08em] uppercase bg-ink hover:bg-accent hover:text-white transition-all duration-300 hover:-translate-y-0.5"
+            >
+              Hablemos de tu proyecto
+            </a>
+          </div>
 
           <button onClick={() => setOpen(!open)} className="lg:hidden text-ink p-2 -mr-2" aria-label="Menú">
             {open ? <X size={24} /> : <Menu size={24} />}
@@ -96,9 +108,18 @@ export default function Navbar() {
               </motion.a>
             ))}
             <a
+              href={EBOOKS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="mt-5 text-center py-4 rounded-full font-semibold uppercase tracking-[0.08em] text-sm border border-white/15 text-ink"
+            >
+              Ebooks
+            </a>
+            <a
               href="#contacto"
               onClick={() => setOpen(false)}
-              className="mt-5 text-center py-4 rounded-full text-bg font-semibold uppercase tracking-[0.08em] text-sm bg-accent"
+              className="mt-3 text-center py-4 rounded-full text-bg font-semibold uppercase tracking-[0.08em] text-sm bg-accent"
             >
               Hablemos de tu proyecto
             </a>

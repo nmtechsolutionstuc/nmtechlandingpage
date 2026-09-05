@@ -152,6 +152,7 @@ export interface SiteContent {
     storeUrl: string
     instagramUser: string
     tiktokUser: string
+    facebookUser: string
     location: string
   }
   footer: {
